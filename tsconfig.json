@@ -1,14 +1,20 @@
 {
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
+    "esModuleInterop": true,
     "rootDir": ".",
     "outDir": "build",
-    "sourceMap": false
+    "sourceMap": false,
+    "allowJs": true,
+    "lib": [
+      "dom",
+    ]
   },
   "include": [
     "src/**/*.ts",
     "test/**/*.ts",
-    "./*.ts"
+    "./*.ts",
+    "node_modules/@types/puppeteer/index.d.ts"
   ],
   
 }
