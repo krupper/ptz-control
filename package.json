@@ -1,0 +1,31 @@
+{
+  "name": "ptz-control",
+  "version": "1.0.0",
+  "description": "Control PTZ cameras with a gamepad",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "compile": "tsc",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krupper/ptz-control.git"
+  },
+  "author": "Ruben Klepp, Vivian Erbenich",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/krupper/ptz-control/issues"
+  },
+  "homepage": "https://github.com/krupper/ptz-control#readme",
+  "devDependencies": {
+    "gts": "^3.1.0",
+    "typescript": "^4.0.3",
+    "@types/node": "^14.11.2"
+  }
+}
