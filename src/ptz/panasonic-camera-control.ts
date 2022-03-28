@@ -3,10 +3,15 @@ const axios = require('axios');
 export default class PanasonicCameraControl implements PTZ {
   constructor(ip: string) {
     this.ip = ip;
+    setInterval(() => {
+      this.runMessageQueue();
+    }, 130);
   }
   ip: string;
   private irisMin = 1366;
   private irisMax = 4094;
+  private panasonicMinimalMessageDelayInMs = 130;
+  private importantEventsQueue: string[] = [];
 
   setPanTiltSpeed(pan: number, tilt: number) {
     if (pan < -100 || pan > 100) {
@@ -27,7 +32,7 @@ export default class PanasonicCameraControl implements PTZ {
       .padStart(2, '0');
     const command = 'PTS' + panasonic_pan + panasonic_tilt;
 
-    return this.sendCommandToPTZ(command);
+    return this.sendCommandToPTZ(command, false);
   }
 
   setZoomSpeed(speed: number) {
@@ -42,12 +47,12 @@ export default class PanasonicCameraControl implements PTZ {
       .padStart(2, '0');
     const command = 'Z' + panasonic_zoom;
 
-    return this.sendCommandToPTZ(command);
+    return this.sendCommandToPTZ(command, false);
   }
 
   setAutoFocus(status: boolean) {
     const command = 'D1' + status ? '0' : '1';
-    this.sendCommandToPTZ(command);
+    this.sendCommandToPTZ(command, true);
   }
 
   setFocusSpeed(speed: number) {
@@ -62,17 +67,17 @@ export default class PanasonicCameraControl implements PTZ {
       .padStart(2, '0');
     const command = 'Z' + panasonic_focus;
 
-    return this.sendCommandToPTZ(command);
+    return this.sendCommandToPTZ(command, false);
   }
 
   setAutoIris(status: boolean) {
     const command = 'D3' + status ? '0' : '1';
-    this.sendCommandToPTZ(command);
+    this.sendCommandToPTZ(command, true);
   }
 
   stepIris(direction: 'up' | 'down', stepSize: number) {
     const get_command = 'AXI';
-    this.sendCommandToPTZ(get_command).then(response => {
+    this.sendCommandInstantToPTZ(get_command).then(response => {
       // extract value command
       const currentIrisValue = response?.replace('axi', '');
       console.log('currentIrisValue: ' + currentIrisValue);
@@ -108,7 +113,7 @@ export default class PanasonicCameraControl implements PTZ {
       console.log('newIrisValue: ' + newIrisValue);
 
       const command = 'AXI' + newIrisValue;
-      this.sendCommandToPTZ(command);
+      this.sendCommandToPTZ(command, true);
     });
   }
 
@@ -120,10 +125,24 @@ export default class PanasonicCameraControl implements PTZ {
       );
     }
     const command = 'R' + presetNumber;
-    this.sendCommandToPTZ(command);
+    this.sendCommandToPTZ(command, true);
   }
 
-  private async sendCommandToPTZ(command: string): Promise<string | undefined> {
+  private sendCommandToPTZ(command: string, importantEvent: boolean): void {
+    if (this.importantEventsQueue.length && !importantEvent) {
+      console.log(
+        'Skipped event due to Panasonic minimal message delay of ' +
+          this.panasonicMinimalMessageDelayInMs +
+          ' ms'
+      );
+      return;
+    }
+    this.importantEventsQueue.push(command);
+  }
+
+  private async sendCommandInstantToPTZ(
+    command: string
+  ): Promise<string | undefined> {
     try {
       const data = await axios.get(
         'http://' + this.ip + '/cgi-bin/aw_ptz?cmd=%23' + command + '&res=1'
@@ -133,6 +152,11 @@ export default class PanasonicCameraControl implements PTZ {
       console.log(error);
       return;
     }
+  }
+
+  private runMessageQueue() {
+    const nextEvent = this.importantEventsQueue.shift();
+    if (nextEvent) this.sendCommandInstantToPTZ(nextEvent);
   }
 
   private hexToNumber(hex: string): number {
