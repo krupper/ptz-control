@@ -1,5 +1,4 @@
 // import XboxController from './controller/microsoft-xbox';
-import Controller from './interfaces/Controller';
 import GameController = require('./controller/test-controller.js');
 import PanasonicCameraControl from './ptz/panasonic-camera-control';
 
