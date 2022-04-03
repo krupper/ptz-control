@@ -1,5 +1,8 @@
-interface PTZ {
+interface PTZcameras {
   ip: string;
+  cameraIdentifier: string;
+  vendor: string;
+  model: string;
 
   setPanTiltSpeed(pan: number, tilt: number): void;
   setZoomSpeed(speed: number): void;
@@ -12,3 +15,5 @@ interface PTZ {
 
   playbackPreset(presetNumber: number): void;
 }
+
+export default PTZcameras;

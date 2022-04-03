@@ -2,47 +2,46 @@ import config from 'config';
 
 // import XboxController from './controller/microsoft-xbox';
 import GameController = require('./controller/test-controller.js');
+import {
+  IConfigCamera,
+  IConfigController,
+  IConfigDefaultRouting,
+} from './interfaces/IConfig.js';
+import PTZcameras from './interfaces/PTZcameras.js';
 import PanasonicCameraControl from './ptz/panasonic-camera-control';
 
 class App {
-  // controller: Controller;
-  testController: GameController;
-  ptz1 = new PanasonicCameraControl('172.17.121.81');
+  config = {
+    controller: config.get('controller') as IConfigController[],
+    cameras: config.get('cameras') as IConfigCamera[],
+    defaultRouting: config.get('defaultRouting') as IConfigDefaultRouting[],
+  };
+
+  controller: GameController[] = [];
+  cameras: PTZcameras[] = [];
 
   constructor() {
-    // this.controller = new XboxController();
-    this.testController = new GameController();
-  }
+    // init controllers from config
+    this.config.controller.forEach(controller => {
+      const newController = new GameController();
+      this.controller.push(newController);
+    });
 
-  async run() {
-    this.testController = new GameController();
-    await this.testController.init();
-    this.testController.on('button', (btn: any) => {
-      // console.log(`Button: ${btn} pressed`);
-      if (btn === '"TRIGGER_RIGHT"') {
-        this.ptz1.setZoomSpeed(-50);
-      }
-
-      if (btn === '"TRIGGER_LEFT"') {
-        this.ptz1.setZoomSpeed(50);
-      }
-
-      if (btn === '"A"') {
-        this.ptz1.setZoomSpeed(0);
+    // init cameras from config
+    this.config.cameras.forEach(camera => {
+      if (camera.vendor === 'Panasonic') {
+        const newCamera = new PanasonicCameraControl(
+          camera.cameraIdentifier,
+          camera.vendor,
+          camera.vendor,
+          camera.ip
+        );
+        this.cameras.push(newCamera);
       }
     });
-    this.testController.on('thumbsticks', (val: any) => {
-      // console.log(val);
-
-      const temp = val.replace('[', '').replace(']', '').split(',');
-
-      const x = (temp[0] * 100) / 2;
-      const y = (temp[1] * 100) / 2;
-
-      // console.log('Pos: x:' + x.toFixed() + ' y: ' + y.toFixed());
-      this.ptz1.setPanTiltSpeed(x, y * -1);
-    });
   }
+
+  async run() {}
 }
 
 export default App;
