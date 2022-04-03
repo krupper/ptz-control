@@ -7,7 +7,7 @@ import {
   IConfigController,
   IConfigDefaultRouting,
 } from './interfaces/IConfig.js';
-import PTZcameras from './interfaces/PTZcameras.js';
+import PTZcameras from './interfaces/IPtzCameras.js';
 import PanasonicCameraControl from './ptz/panasonic-camera-control';
 
 class App {
@@ -41,7 +41,9 @@ class App {
     });
   }
 
-  async run() {}
+  async run() {
+    this.cameras[3].stepIris('up', 10);
+  }
 }
 
 export default App;

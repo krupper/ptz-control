@@ -16,7 +16,7 @@ export default class PanasonicCameraControl implements IPtzCameras {
 
     setInterval(() => {
       this.runMessageQueue();
-    }, 130);
+    }, this.panasonicMinimalMessageDelayInMs);
   }
 
   cameraIdentifier: string;
