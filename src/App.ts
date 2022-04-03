@@ -1,48 +1,48 @@
-// import XboxController from './controller/microsoft-xbox';
-import Controller from './interfaces/Controller';
-import PanasonicCameraControl from './ptz/panasonic-camera-control';
-import XboxController from './controller/XBoxController';
+import config from 'config';
+import StickMotionEvent from './interfaces/IStickMotionEvent';
+import Controller from './classes/Controller';
+import {
+  IConfigCamera,
+  IConfigController,
+  IConfigDefaultRouting,
+} from './interfaces/IConfig.js';
+import PtzCameras from './classes/PtzCameras';
+import PanasonicCameraControl from './classes/PanasonicCameraControl';
+import XboxController from './classes/XBoxController';
 
 class App {
   controller: Controller | XboxController;
-  // testController: GameController;
-  //ptz1 = new PanasonicCameraControl('172.17.121.81');
+  config = {
+    controller: config.get('controller') as IConfigController[],
+    cameras: config.get('cameras') as IConfigCamera[],
+    defaultRouting: config.get('defaultRouting') as IConfigDefaultRouting[],
+  };
+
+  cameras: PtzCameras[] = [];
 
   constructor() {
     this.controller = new XboxController('XBox Controller', 'Microsoft', 1);
-    // this.testController = new GameController();
+
+    // init cameras from config
+    this.config.cameras.forEach(camera => {
+      if (camera.vendor === 'Panasonic') {
+        const newCamera = new PanasonicCameraControl(
+          camera.cameraIdentifier,
+          camera.vendor,
+          camera.vendor,
+          camera.ip
+        );
+        this.cameras.push(newCamera);
+      }
+    });
   }
 
   async run() {
     await this.controller.init();
 
-    this.controller.onLeftStickMotion(event => {
-      console.log(event);
+    this.controller.onLeftStickMotion((data: StickMotionEvent) => {
+      console.log(data);
     });
-    console.log('Wait for commands');
-
-    // this.testController = new GameController();
-    // await this.testController.init();
-    // this.testController.on('button', (btn: any) => {
-    //   // console.log(`Button: ${btn} pressed`);
-    //   if (btn === '"TRIGGER_RIGHT"') {
-    //     this.ptz1.setZoomSpeed(-50);
-    //   }
-    //   if (btn === '"TRIGGER_LEFT"') {
-    //     this.ptz1.setZoomSpeed(50);
-    //   }
-    //   if (btn === '"A"') {
-    //     this.ptz1.setZoomSpeed(0);
-    //   }
-    // });
-    // this.testController.on('thumbsticks', (val: any) => {
-    //   // console.log(val);
-    //   const temp = val.replace('[', '').replace(']', '').split(',');
-    //   const x = (temp[0] * 100) / 2;
-    //   const y = (temp[1] * 100) / 2;
-    //   // console.log('Pos: x:' + x.toFixed() + ' y: ' + y.toFixed());
-    //   this.ptz1.setPanTiltSpeed(x, y * -1);
-    // });
   }
 }
 
