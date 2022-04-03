@@ -1,8 +1,8 @@
-import Controller from '../interfaces/Controller';
+import IController from '../interfaces/IController';
 import * as puppeteer from 'puppeteer';
 import {EventEmitter} from 'events';
 
-class XboxController implements Controller {
+class XboxController implements IController {
   eventEmitter: EventEmitter;
   SIGNAL_POLL_INTERVAL_MS = 50;
   THUMBSTICK_NOISE_THRESHOLD = 0.15;
