@@ -1,7 +1,8 @@
 import Controller from './Controller';
-import Gamepad, {AxisMotionData} from 'sdl2-gamecontroller';
+import {AxisMotionData, ButtonPress} from 'sdl2-gamecontroller';
 import EventEmitter from 'events';
 import StickMotionEvent from '../interfaces/IStickMotionEvent';
+import AppService from '../AppService';
 class XboxController extends Controller {
   private eventEmitter = new EventEmitter();
 
@@ -15,45 +16,60 @@ class XboxController extends Controller {
   private rightStickY = 0;
 
   constructor(
+    appService: AppService,
     product: string,
     manufacturer: string,
     playerId: number,
     joystickDeviceIndex: number
   ) {
-    super(product, manufacturer, playerId, joystickDeviceIndex);
-
-    this.onLeftStickMotion((data: StickMotionEvent) => {
-      console.log(data);
-    });
+    super(appService, product, manufacturer, playerId, joystickDeviceIndex);
   }
 
-  onLeftStickMotion(event: (data: StickMotionEvent) => void) {
-    Gamepad.on('leftx', (data: AxisMotionData) => {
-      this.leftStickX = data.value;
+  onButtonDown(data: ButtonPress): void {
+    if (data.button === 'dpleft') this.previousCamera();
+    if (data.button === 'dpright') this.nextCamera();
+    if (this.currentCameraNumber !== undefined) {
+      console.log('Player ' + this.playerId + ' selected camera:');
+      console.log(this.appService.cameras[this.currentCameraNumber]);
+    }
+  }
 
-      if (this.lefStickTimestamp < data.timestamp) {
-        const leftStickMotionEvent: StickMotionEvent = {
-          x: this.leftStickX,
-          y: this.leftStickY,
-        };
+  onLeftStickMotion(data: AxisMotionData) {
+    // filter for this controller
+    if (data.player === this.playerId) {
+      if (data.button === 'leftx') {
+        this.leftStickX = data.value * (100 / 32767);
 
-        this.lefStickTimestamp = data.timestamp;
-        event(leftStickMotionEvent);
+        if (this.lefStickTimestamp < data.timestamp) {
+          const leftStickMotionEvent: StickMotionEvent = {
+            x: this.leftStickX,
+            y: this.leftStickY,
+          };
+
+          this.lefStickTimestamp = data.timestamp;
+          console.log(leftStickMotionEvent);
+        }
       }
-    });
-    Gamepad.on('lefty', (data: AxisMotionData) => {
-      this.leftStickY = data.value;
+      if (data.button === 'lefty') {
+        // filter for this controller
+        this.leftStickY = data.value * (100 / 32767);
 
-      if (this.lefStickTimestamp < data.timestamp) {
-        const leftStickMotionEvent: StickMotionEvent = {
-          x: this.leftStickX,
-          y: this.leftStickY,
-        };
+        if (this.lefStickTimestamp < data.timestamp) {
+          const leftStickMotionEvent: StickMotionEvent = {
+            x: this.leftStickX,
+            y: this.leftStickY,
+          };
 
-        this.lefStickTimestamp = data.timestamp;
-        event(leftStickMotionEvent);
+          this.lefStickTimestamp = data.timestamp;
+          console.log(leftStickMotionEvent);
+        }
       }
-    });
+      // send event to camera
+      this.currentCameraObject?.setPanTiltSpeed(
+        this.leftStickX,
+        this.leftStickY
+      );
+    }
   }
 }
 

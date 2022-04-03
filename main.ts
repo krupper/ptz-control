@@ -1,5 +1,5 @@
-import App from './src/App';
+import AppService from './src/AppService';
 
-const app = new App();
+const app = new AppService();
 
 app.run();
