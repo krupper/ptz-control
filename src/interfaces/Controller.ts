@@ -1,4 +1,4 @@
-interface Controller {
+interface IController {
   product: string;
   productId: number;
   manufacturer: string;
@@ -10,4 +10,4 @@ interface Controller {
   test(): void;
 }
 
-export default Controller;
+export default IController;

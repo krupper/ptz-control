@@ -1,8 +1,8 @@
-import PTZcameras from '../interfaces/PTZcameras';
+import IPtzCameras from '../interfaces/IPtzCameras';
 
 const axios = require('axios');
 
-export default class PanasonicCameraControl implements PTZcameras {
+export default class PanasonicCameraControl implements IPtzCameras {
   constructor(
     cameraIdentifier: string,
     vendor: string,

@@ -1,4 +1,4 @@
-interface PTZcameras {
+interface IPtzCameras {
   ip: string;
   cameraIdentifier: string;
   vendor: string;
@@ -16,4 +16,4 @@ interface PTZcameras {
   playbackPreset(presetNumber: number): void;
 }
 
-export default PTZcameras;
+export default IPtzCameras;
