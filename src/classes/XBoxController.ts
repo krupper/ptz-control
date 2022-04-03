@@ -14,21 +14,16 @@ class XboxController extends Controller {
   private rightStickX = 0;
   private rightStickY = 0;
 
-  constructor(product: string, manufacturer: string, playerId: number) {
-    super(product, manufacturer, playerId);
-  }
+  constructor(
+    product: string,
+    manufacturer: string,
+    playerId: number,
+    joystickDeviceIndex: number
+  ) {
+    super(product, manufacturer, playerId, joystickDeviceIndex);
 
-  async init(): Promise<void> {
-    return new Promise(resolve => {
-      // Wait until SDL2 is initialized
-      Gamepad.on('sdl-init', () => {
-        console.log('Wait until an XBox controller connects');
-
-        Gamepad.on('controller-device-added', data => {
-          console.log('Yeaha! Found an', data.name);
-          resolve();
-        });
-      });
+    this.onLeftStickMotion((data: StickMotionEvent) => {
+      console.log(data);
     });
   }
 

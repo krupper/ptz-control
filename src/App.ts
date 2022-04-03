@@ -1,5 +1,5 @@
 import config from 'config';
-import StickMotionEvent from './interfaces/IStickMotionEvent';
+import Gamepad from 'sdl2-gamecontroller';
 import Controller from './classes/Controller';
 import {
   IConfigCamera,
@@ -11,7 +11,7 @@ import PanasonicCameraControl from './classes/PanasonicCameraControl';
 import XboxController from './classes/XBoxController';
 
 class App {
-  controller: Controller | XboxController;
+  controllers: Controller[] = [];
   config = {
     controller: config.get('controller') as IConfigController[],
     cameras: config.get('cameras') as IConfigCamera[],
@@ -21,8 +21,6 @@ class App {
   cameras: PtzCameras[] = [];
 
   constructor() {
-    this.controller = new XboxController('XBox Controller', 'Microsoft', 1);
-
     // init cameras from config
     this.config.cameras.forEach(camera => {
       if (camera.vendor === 'Panasonic') {
@@ -38,10 +36,53 @@ class App {
   }
 
   async run() {
-    await this.controller.init();
+    // Wait until SDL2 is initialized
+    Gamepad.on('sdl-init', () => {
+      console.log('Wait until an controller connects');
 
-    this.controller.onLeftStickMotion((data: StickMotionEvent) => {
-      console.log(data);
+      // add new controller
+      Gamepad.on('controller-device-added', data => {
+        console.log('Yeaha! Found an', data.name);
+
+        if (!data.player) {
+          console.log('No Player ID for controller found');
+          return;
+        }
+
+        let newController: Controller | undefined = undefined;
+
+        // if controller is: Xbox Series X Controller
+        if (data.vendor_id === 1118 && data.product_id === 2835) {
+          newController = new XboxController(
+            'XBox Controller',
+            'Microsoft',
+            data.player,
+            data.which
+          );
+        }
+
+        // store new controller
+        if (newController) {
+          console.log(
+            'Created new controller object with player id: ' +
+              data.player +
+              ' and joystickDeviceIndex: ' +
+              data.which
+          );
+          this.controllers.push(newController);
+        }
+      });
+
+      // removed controller
+      Gamepad.on('controller-device-removed', data => {
+        console.log(data.message);
+        console.log('To be done: remove object & event emitter');
+
+        // remove controller from array
+        // this.controllers = this.controllers.filter(controller => {
+        //   return controller.joystickDeviceIndex !== data.which;
+        // });
+      });
     });
   }
 }
