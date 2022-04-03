@@ -1,11 +1,7 @@
 import config from 'config';
 import Gamepad from 'sdl2-gamecontroller';
 import Controller from './classes/Controller';
-import {
-  IConfigCamera,
-  IConfigController,
-  IConfigDefaultRouting,
-} from './interfaces/IConfig.js';
+import {IConfigCamera} from './interfaces/IConfig.js';
 import PtzCameras from './classes/PtzCameras';
 import PanasonicCameraControl from './classes/PanasonicCameraControl';
 import XboxController from './classes/XBoxController';
@@ -13,9 +9,7 @@ import XboxController from './classes/XBoxController';
 class App {
   controllers: Controller[] = [];
   config = {
-    controller: config.get('controller') as IConfigController[],
     cameras: config.get('cameras') as IConfigCamera[],
-    defaultRouting: config.get('defaultRouting') as IConfigDefaultRouting[],
   };
 
   cameras: PtzCameras[] = [];
