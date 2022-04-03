@@ -1,10 +1,10 @@
-interface Controller {
+import StickMotionEvent from './IStickMotionEvent';
+declare abstract class Controller {
     product: string;
-    productId: number;
     manufacturer: string;
-    vendorId: number;
-    on(event: any, cb: any): void;
-    init(): void;
-    test(): void;
+    playerId: number;
+    constructor(product: string, manufacturer: string, playerId: number);
+    abstract init(): Promise<void>;
+    abstract onLeftStickMotion(callback: (event: StickMotionEvent) => void): void;
 }
 export default Controller;

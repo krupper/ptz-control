@@ -1,8 +1,7 @@
-import GameController = require('./controller/test-controller.js');
-import PanasonicCameraControl from './ptz/panasonic-camera-control';
+import Controller from './interfaces/Controller';
+import XboxController from './controller/XBoxController';
 declare class App {
-    testController: GameController;
-    ptz1: PanasonicCameraControl;
+    controller: Controller | XboxController;
     constructor();
     run(): Promise<void>;
 }
