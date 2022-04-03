@@ -9,6 +9,7 @@
     "clean": "gts clean",
     "compile": "tsc",
     "fix": "gts fix",
+    "start": "npm run compile && node ./build/main.js",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
     "posttest": "npm run lint"
@@ -24,14 +25,20 @@
   },
   "homepage": "https://github.com/krupper/ptz-control#readme",
   "devDependencies": {
+    "@types/node": "^14.18.12",
     "@types/node-hid": "^1.3.1",
     "@types/puppeteer": "^5.4.5",
-    "@types/node": "^14.18.12",
     "gts": "^3.1.0",
     "typescript": "^4.0.3"
   },
   "dependencies": {
+    "@types/config": "^0.0.41",
+    "axios": "^0.26.1",
+    "config": "^3.3.7",
     "puppeteer": "^13.5.1",
-    "axios": "^0.26.1"
+    "ts-node": "^10.7.0"
+  },
+  "engines": {
+    "node": ">=17.0.0"
   }
 }
