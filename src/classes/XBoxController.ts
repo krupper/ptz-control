@@ -1,4 +1,4 @@
-import Controller from '../interfaces/Controller';
+import Controller from './Controller';
 import Gamepad, {AxisMotionData} from 'sdl2-gamecontroller';
 import EventEmitter from 'events';
 import StickMotionEvent from '../interfaces/IStickMotionEvent';
@@ -32,7 +32,7 @@ class XboxController extends Controller {
     });
   }
 
-  onLeftStickMotion(event: (event: StickMotionEvent) => void) {
+  onLeftStickMotion(event: (data: StickMotionEvent) => void) {
     Gamepad.on('leftx', (data: AxisMotionData) => {
       this.leftStickX = data.value;
 

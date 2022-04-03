@@ -13,8 +13,7 @@
   "include": [
     "src/**/*.ts",
     "test/**/*.ts",
-    "./*.ts",
-    "node_modules/@types/puppeteer/index.d.ts"
+    "./*.ts"
   ],
   
 }
