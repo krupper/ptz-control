@@ -1,28 +1,20 @@
-import IPtzCameras from '../interfaces/IPtzCameras';
+import IPtzCameras from './PtzCameras';
 
 const axios = require('axios');
 
-export default class PanasonicCameraControl implements IPtzCameras {
+export default class PanasonicCameraControl extends IPtzCameras {
   constructor(
     cameraIdentifier: string,
     vendor: string,
     model: string,
     ip: string
   ) {
-    this.cameraIdentifier = cameraIdentifier;
-    this.vendor = vendor;
-    this.model = model;
-    this.ip = ip;
+    super(cameraIdentifier, vendor, model, ip);
 
     setInterval(() => {
       this.runMessageQueue();
     }, this.panasonicMinimalMessageDelayInMs);
   }
-
-  cameraIdentifier: string;
-  vendor: string;
-  model: string;
-  ip: string;
 
   private irisMin = 1366;
   private irisMax = 4094;
