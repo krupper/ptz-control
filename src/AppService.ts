@@ -21,7 +21,7 @@ class AppService {
         const newCamera = new PanasonicCameraControl(
           camera.cameraIdentifier,
           camera.vendor,
-          camera.vendor,
+          camera.model,
           camera.ip
         );
         this.cameras.push(newCamera);
