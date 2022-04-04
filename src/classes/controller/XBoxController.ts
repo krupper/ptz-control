@@ -32,7 +32,10 @@ class XboxController extends Controller {
   onButtonDown(data: ButtonPress): void {
     if (data.button === 'dpleft') this.previousCamera();
     if (data.button === 'dpright') this.nextCamera();
-    if (this.currentCameraNumber !== undefined) {
+    if (
+      (data.button === 'dpleft' || data.button === 'dpright') &&
+      this.currentCameraNumber !== undefined
+    ) {
       console.log('Player ' + this.playerId + ' selected camera:');
       console.log(this.appService.cameras[this.currentCameraNumber]);
     }
@@ -91,10 +94,12 @@ class XboxController extends Controller {
 
   onLeftShoulderButton(data: ButtonPress): void {
     console.log(data);
+    this.currentCameraObject?.stepIris('down', 100);
   }
 
   onRightShoulderButton(data: ButtonPress): void {
     console.log(data);
+    this.currentCameraObject?.stepIris('up', 100);
   }
 }
 

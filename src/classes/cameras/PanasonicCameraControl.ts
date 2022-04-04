@@ -16,7 +16,10 @@ export default class PanasonicCameraControl extends IPtzCameras {
     }, this.panasonicMinimalMessageDelayInMs);
   }
 
-  private irisMin = 1366;
+  // Iris behaviour:
+  //    1366 - 1600 Iris closed
+  //    1601 - 4094 Iris open
+  private irisMin = 1600;
   private irisMax = 4094;
   private panasonicMinimalMessageDelayInMs = 130;
   private importantEventsQueue: string[] = [];
@@ -155,9 +158,11 @@ export default class PanasonicCameraControl extends IPtzCameras {
     command: string
   ): Promise<string | undefined> {
     try {
-      const data = await axios.get(
-        'http://' + this.ip + '/cgi-bin/aw_ptz?cmd=%23' + command + '&res=1'
-      );
+      const url =
+        'http://' + this.ip + '/cgi-bin/aw_ptz?cmd=%23' + command + '&res=1';
+      console.log(url);
+
+      const data = await axios.get(url);
       return data.data;
     } catch (error) {
       console.log(error);
@@ -190,7 +195,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       console.log('Hex value out of range');
       number = max;
     }
-    return this.numberToHex(number + step);
+    return this.numberToHex(number);
   }
 
   private previousHexStep(
@@ -205,6 +210,6 @@ export default class PanasonicCameraControl extends IPtzCameras {
       console.log('Hex value out of range');
       number = min;
     }
-    return this.numberToHex(number - step);
+    return this.numberToHex(number);
   }
 }

@@ -92,10 +92,14 @@ class AppService {
           this.controllers[data.player].onButtonDown(data);
       });
       Gamepad.on('b:down', data => {
+        Gamepad.rumble(60000, 40000, 100, data.player);
+        console.log('rumble');
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].onButtonDown(data);
       });
       Gamepad.on('x:down', data => {
+        console.log('rumbleTriggers');
+        Gamepad.rumbleTriggers(40000, 40000, 100, data.player);
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].onButtonDown(data);
       });
@@ -134,6 +138,12 @@ class AppService {
       Gamepad.on('righttrigger', data => {
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].onRightTriggerMotion(data);
+      });
+      Gamepad.on('error', data => {
+        console.error(data);
+      });
+      Gamepad.on('warning', data => {
+        console.warn(data);
       });
     });
   }
