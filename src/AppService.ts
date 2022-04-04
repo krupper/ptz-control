@@ -119,6 +119,22 @@ class AppService {
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].onButtonDown(data);
       });
+      Gamepad.on('leftshoulder:down', data => {
+        if (data.player && this.controllers[data.player])
+          this.controllers[data.player].onLeftShoulderButton(data);
+      });
+      Gamepad.on('rightshoulder:down', data => {
+        if (data.player && this.controllers[data.player])
+          this.controllers[data.player].onRightShoulderButton(data);
+      });
+      Gamepad.on('lefttrigger', data => {
+        if (data.player && this.controllers[data.player])
+          this.controllers[data.player].onLeftTriggerMotion(data);
+      });
+      Gamepad.on('righttrigger', data => {
+        if (data.player && this.controllers[data.player])
+          this.controllers[data.player].onRightTriggerMotion(data);
+      });
     });
   }
 }

@@ -15,6 +15,10 @@ class XboxController extends Controller {
   private rightStickX = 0;
   private rightStickY = 0;
 
+  // trigger
+  private leftTrigger = 0;
+  private rightTrigger = 0;
+
   constructor(
     appService: AppService,
     product: string,
@@ -67,9 +71,30 @@ class XboxController extends Controller {
       // send event to camera
       this.currentCameraObject?.setPanTiltSpeed(
         this.leftStickX,
-        this.leftStickY
+        this.leftStickY * -1
       );
     }
+  }
+
+  onRightStickMotion(data: AxisMotionData): void {
+    console.log(data);
+  }
+  onLeftTriggerMotion(data: AxisMotionData): void {
+    this.leftTrigger = data.value * (100 / 32767);
+    // send event to camera
+    this.currentCameraObject?.setZoomSpeed(this.leftTrigger * -1);
+  }
+  onRightTriggerMotion(data: AxisMotionData): void {
+    this.rightTrigger = data.value * (100 / 32767);
+    this.currentCameraObject?.setZoomSpeed(this.rightTrigger);
+  }
+
+  onLeftShoulderButton(data: ButtonPress): void {
+    console.log(data);
+  }
+
+  onRightShoulderButton(data: ButtonPress): void {
+    console.log(data);
   }
 }
 

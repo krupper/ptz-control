@@ -32,7 +32,12 @@ abstract class Controller {
   }
 
   abstract onLeftStickMotion(data: AxisMotionData): void;
+  abstract onRightStickMotion(data: AxisMotionData): void;
+  abstract onLeftTriggerMotion(data: AxisMotionData): void;
+  abstract onRightTriggerMotion(data: AxisMotionData): void;
   abstract onButtonDown(data: ButtonPress): void;
+  abstract onLeftShoulderButton(data: ButtonPress): void;
+  abstract onRightShoulderButton(data: ButtonPress): void;
 
   protected nextCamera() {
     if (this.currentCameraNumber !== undefined) {
