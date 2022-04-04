@@ -1,6 +1,6 @@
 import {AxisMotionData, ButtonPress} from 'sdl2-gamecontroller';
-import AppService from '../AppService';
-import PtzCameras from './PtzCameras';
+import AppService from '../../AppService';
+import PtzCameras from '../cameras/PtzCameras';
 abstract class Controller {
   appService: AppService;
   product: string;

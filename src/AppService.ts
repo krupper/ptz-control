@@ -1,10 +1,10 @@
 import config from 'config';
 import Gamepad from 'sdl2-gamecontroller';
-import Controller from './classes/Controller';
+import Controller from './classes/controller/Controller';
 import {IConfigCamera} from './interfaces/IConfig.js';
-import PtzCameras from './classes/PtzCameras';
-import PanasonicCameraControl from './classes/PanasonicCameraControl';
-import XboxController from './classes/XBoxController';
+import PtzCameras from './classes/cameras/PtzCameras';
+import PanasonicCameraControl from './classes/cameras/PanasonicCameraControl';
+import XboxController from './classes/controller/XBoxController';
 
 class AppService {
   controllers: Controller[] = [];

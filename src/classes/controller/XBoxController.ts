@@ -1,8 +1,8 @@
 import Controller from './Controller';
 import {AxisMotionData, ButtonPress} from 'sdl2-gamecontroller';
 import EventEmitter from 'events';
-import StickMotionEvent from '../interfaces/IStickMotionEvent';
-import AppService from '../AppService';
+import StickMotionEvent from '../../interfaces/IStickMotionEvent';
+import AppService from '../../AppService';
 class XboxController extends Controller {
   private eventEmitter = new EventEmitter();
 
