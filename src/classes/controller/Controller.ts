@@ -1,26 +1,27 @@
 import {AxisMotionData, ButtonPress} from 'sdl2-gamecontroller';
 import AppService from '../../AppService';
+import StickMotionEvent from '../../interfaces/IStickMotionEvent';
 import PtzCameras from '../cameras/PtzCameras';
 abstract class Controller {
   appService: AppService;
   product: string;
   manufacturer: string;
-  playerId: number;
+  controllerId: number;
   joystickDeviceIndex: number; // also called "which"
-  currentCameraNumber: number | undefined;
+  currentCameraNumber: number;
   currentCameraObject: PtzCameras | undefined;
 
   constructor(
     appService: AppService,
     product: string,
     manufacturer: string,
-    playerId: number,
+    controllerId: number,
     joystickDeviceIndex: number
   ) {
     this.appService = appService;
     this.product = product;
     this.manufacturer = manufacturer;
-    this.playerId = playerId;
+    this.controllerId = controllerId;
     this.joystickDeviceIndex = joystickDeviceIndex;
     this.currentCameraNumber = 0;
 
@@ -31,7 +32,16 @@ abstract class Controller {
     }
   }
 
-  abstract onLeftStickMotion(data: AxisMotionData): void;
+  abstract proxyLeftStickMotion(data: AxisMotionData): void;
+  onLeftStickMotion(
+    callback: (data: StickMotionEvent, currentCameraNumber: number) => void
+  ): void {
+    this.leftStickMotionCallback = callback;
+  }
+  leftStickMotionCallback:
+    | ((data: StickMotionEvent, currentCameraNumber: number) => void)
+    | undefined;
+
   abstract onRightStickMotion(data: AxisMotionData): void;
   abstract onLeftTriggerMotion(data: AxisMotionData): void;
   abstract onRightTriggerMotion(data: AxisMotionData): void;

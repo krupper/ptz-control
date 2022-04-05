@@ -1,11 +1,8 @@
 import Controller from './Controller';
 import {AxisMotionData, ButtonPress} from 'sdl2-gamecontroller';
-import EventEmitter from 'events';
 import StickMotionEvent from '../../interfaces/IStickMotionEvent';
 import AppService from '../../AppService';
 class XboxController extends Controller {
-  private eventEmitter = new EventEmitter();
-
   // Left stick
   private leftStickX = 0;
   private leftStickY = 0;
@@ -23,10 +20,10 @@ class XboxController extends Controller {
     appService: AppService,
     product: string,
     manufacturer: string,
-    playerId: number,
+    controllerId: number,
     joystickDeviceIndex: number
   ) {
-    super(appService, product, manufacturer, playerId, joystickDeviceIndex);
+    super(appService, product, manufacturer, controllerId, joystickDeviceIndex);
   }
 
   onButtonDown(data: ButtonPress): void {
@@ -36,14 +33,14 @@ class XboxController extends Controller {
       (data.button === 'dpleft' || data.button === 'dpright') &&
       this.currentCameraNumber !== undefined
     ) {
-      console.log('Player ' + this.playerId + ' selected camera:');
+      console.log('Controller ' + this.controllerId + ' selected camera:');
       console.log(this.appService.cameras[this.currentCameraNumber]);
     }
   }
 
-  onLeftStickMotion(data: AxisMotionData) {
+  proxyLeftStickMotion(data: AxisMotionData) {
     // filter for this controller
-    if (data.player === this.playerId) {
+    if (data.player === this.controllerId) {
       if (data.button === 'leftx') {
         this.leftStickX = data.value * (100 / 32767);
 
@@ -54,7 +51,14 @@ class XboxController extends Controller {
           };
 
           this.lefStickTimestamp = data.timestamp;
-          console.log(leftStickMotionEvent);
+
+          // fire the callback function
+          if (this.leftStickMotionCallback) {
+            this.leftStickMotionCallback(
+              leftStickMotionEvent,
+              this.currentCameraNumber
+            );
+          }
         }
       }
       if (data.button === 'lefty') {
@@ -68,7 +72,14 @@ class XboxController extends Controller {
           };
 
           this.lefStickTimestamp = data.timestamp;
-          console.log(leftStickMotionEvent);
+
+          // fire the callback function
+          if (this.leftStickMotionCallback) {
+            this.leftStickMotionCallback(
+              leftStickMotionEvent,
+              this.currentCameraNumber
+            );
+          }
         }
       }
       // send event to camera

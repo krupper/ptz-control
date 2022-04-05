@@ -5,6 +5,7 @@ import {IConfigCamera} from './interfaces/IConfig.js';
 import PtzCameras from './classes/cameras/PtzCameras';
 import PanasonicCameraControl from './classes/cameras/PanasonicCameraControl';
 import XboxController from './classes/controller/XBoxController';
+import StickMotionEvent from './interfaces/IStickMotionEvent';
 
 class AppService {
   controllers: Controller[] = [];
@@ -29,7 +30,11 @@ class AppService {
     });
   }
 
-  async run() {
+  mapLeftStickMotion(data: StickMotionEvent, currentCameraNumber: number) {
+    console.log('Stick motion event:', data, ' on ', currentCameraNumber);
+  }
+
+  run() {
     // Wait until SDL2 is initialized
     Gamepad.on('sdl-init', () => {
       console.log('Wait until an controller connects');
@@ -64,6 +69,10 @@ class AppService {
               ' and joystickDeviceIndex: ' +
               data.which
           );
+
+          // add controller mapping
+          newController.onLeftStickMotion(this.mapLeftStickMotion);
+
           this.controllers[data.player] = newController;
         }
       });
@@ -79,11 +88,11 @@ class AppService {
       // leftstick methods
       Gamepad.on('leftx', data => {
         if (data.player && this.controllers[data.player])
-          this.controllers[data.player].onLeftStickMotion(data);
+          this.controllers[data.player].proxyLeftStickMotion(data);
       });
       Gamepad.on('lefty', data => {
         if (data.player && this.controllers[data.player])
-          this.controllers[data.player].onLeftStickMotion(data);
+          this.controllers[data.player].proxyLeftStickMotion(data);
       });
 
       // button down methods
