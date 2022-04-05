@@ -6,11 +6,12 @@ class XboxController extends Controller {
   // Left stick
   private leftStickX = 0;
   private leftStickY = 0;
-  private lefStickTimestamp = 0;
+  private leftStickTimestamp = 0;
 
   // Right stick
   private rightStickX = 0;
   private rightStickY = 0;
+  private rightStickTimestamp = 0;
 
   // trigger
   private leftTrigger = 0;
@@ -26,7 +27,7 @@ class XboxController extends Controller {
     super(appService, product, manufacturer, controllerId, joystickDeviceIndex);
   }
 
-  onButtonDown(data: ButtonPress): void {
+  proxyButtonDown(data: ButtonPress): void {
     if (data.button === 'dpleft') this.previousCamera();
     if (data.button === 'dpright') this.nextCamera();
     if (
@@ -44,13 +45,13 @@ class XboxController extends Controller {
       if (data.button === 'leftx') {
         this.leftStickX = data.value * (100 / 32767);
 
-        if (this.lefStickTimestamp < data.timestamp) {
+        if (this.leftStickTimestamp < data.timestamp) {
           const leftStickMotionEvent: StickMotionEvent = {
             x: this.leftStickX,
             y: this.leftStickY,
           };
 
-          this.lefStickTimestamp = data.timestamp;
+          this.leftStickTimestamp = data.timestamp;
 
           // fire the callback function
           if (this.leftStickMotionCallback) {
@@ -66,13 +67,13 @@ class XboxController extends Controller {
         // filter for this controller
         this.leftStickY = data.value * (100 / 32767);
 
-        if (this.lefStickTimestamp < data.timestamp) {
+        if (this.leftStickTimestamp < data.timestamp) {
           const leftStickMotionEvent: StickMotionEvent = {
             x: this.leftStickX,
             y: this.leftStickY,
           };
 
-          this.lefStickTimestamp = data.timestamp;
+          this.leftStickTimestamp = data.timestamp;
 
           // fire the callback function
           if (this.leftStickMotionCallback) {
@@ -84,35 +85,99 @@ class XboxController extends Controller {
           }
         }
       }
-      // send event to camera
-      this.currentCameraObject?.setPanTiltSpeed(
-        this.leftStickX,
-        this.leftStickY * -1
+    }
+  }
+
+  proxyRightStickMotion(data: AxisMotionData): void {
+    // filter for this controller
+    if (data.player === this.controllerId) {
+      if (data.button === 'rightx') {
+        this.rightStickX = data.value * (100 / 32767);
+
+        if (this.rightStickTimestamp < data.timestamp) {
+          const rightStickMotionEvent: StickMotionEvent = {
+            x: this.rightStickX,
+            y: this.rightStickY,
+          };
+
+          this.rightStickTimestamp = data.timestamp;
+
+          // fire the callback function
+          if (this.rightStickMotionCallback) {
+            this.rightStickMotionCallback(
+              rightStickMotionEvent,
+              this.currentCameraNumber,
+              this.appService
+            );
+          }
+        }
+      }
+      if (data.button === 'righty') {
+        // filter for this controller
+        this.rightStickY = data.value * (100 / 32767);
+
+        if (this.rightStickTimestamp < data.timestamp) {
+          const rightStickMotionEvent: StickMotionEvent = {
+            x: this.rightStickX,
+            y: this.rightStickY,
+          };
+
+          this.leftStickTimestamp = data.timestamp;
+
+          // fire the callback function
+          if (this.rightStickMotionCallback) {
+            this.rightStickMotionCallback(
+              rightStickMotionEvent,
+              this.currentCameraNumber,
+              this.appService
+            );
+          }
+        }
+      }
+    }
+  }
+  proxyLeftTriggerMotion(data: AxisMotionData): void {
+    this.leftTrigger = data.value * (100 / 32767);
+
+    // fire the callback function
+    if (this.leftTriggerMotionCallback) {
+      this.leftTriggerMotionCallback(
+        this.leftTrigger,
+        this.currentCameraNumber,
+        this.appService
+      );
+    }
+  }
+  proxyRightTriggerMotion(data: AxisMotionData): void {
+    this.rightTrigger = data.value * (100 / 32767);
+    // fire the callback function
+    if (this.rightTriggerMotionCallback) {
+      this.rightTriggerMotionCallback(
+        this.rightTrigger,
+        this.currentCameraNumber,
+        this.appService
       );
     }
   }
 
-  onRightStickMotion(data: AxisMotionData): void {
-    console.log(data);
-  }
-  onLeftTriggerMotion(data: AxisMotionData): void {
-    this.leftTrigger = data.value * (100 / 32767);
-    // send event to camera
-    this.currentCameraObject?.setZoomSpeed(this.leftTrigger * -1);
-  }
-  onRightTriggerMotion(data: AxisMotionData): void {
-    this.rightTrigger = data.value * (100 / 32767);
-    this.currentCameraObject?.setZoomSpeed(this.rightTrigger);
+  proxyLeftShoulderButton(data: ButtonPress): void {
+    if (this.leftShoulderButtonCallback) {
+      this.leftShoulderButtonCallback(
+        data.button,
+        this.currentCameraNumber,
+        this.appService
+      );
+    }
   }
 
-  onLeftShoulderButton(data: ButtonPress): void {
-    console.log(data);
-    this.currentCameraObject?.stepIris('down', 100);
-  }
-
-  onRightShoulderButton(data: ButtonPress): void {
-    console.log(data);
-    this.currentCameraObject?.stepIris('up', 100);
+  proxyRightShoulderButton(data: ButtonPress): void {
+    if (this.rightShoulderButtonCallback) {
+      this.rightShoulderButtonCallback(
+        data.button,
+        this.currentCameraNumber,
+        this.appService
+      );
+    }
   }
 }
 

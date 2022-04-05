@@ -1,4 +1,4 @@
-import {AxisMotionData, ButtonPress} from 'sdl2-gamecontroller';
+import {AxisMotionData, ButtonPress, ButtonType} from 'sdl2-gamecontroller';
 import AppService from '../../AppService';
 import StickMotionEvent from '../../interfaces/IStickMotionEvent';
 import PtzCameras from '../cameras/PtzCameras';
@@ -32,6 +32,9 @@ abstract class Controller {
     }
   }
 
+  //
+  // left-stick motion
+  //
   abstract proxyLeftStickMotion(data: AxisMotionData): void;
   onLeftStickMotion(
     callback: (
@@ -50,12 +53,131 @@ abstract class Controller {
       ) => void)
     | undefined;
 
-  abstract onRightStickMotion(data: AxisMotionData): void;
-  abstract onLeftTriggerMotion(data: AxisMotionData): void;
-  abstract onRightTriggerMotion(data: AxisMotionData): void;
-  abstract onButtonDown(data: ButtonPress): void;
-  abstract onLeftShoulderButton(data: ButtonPress): void;
-  abstract onRightShoulderButton(data: ButtonPress): void;
+  //
+  // right-stick motion
+  //
+  abstract proxyRightStickMotion(data: AxisMotionData): void;
+  onRightStickMotion(
+    callback: (
+      data: StickMotionEvent,
+      currentCameraNumber: number,
+      context: AppService
+    ) => void
+  ): void {
+    this.rightStickMotionCallback = callback;
+  }
+  rightStickMotionCallback:
+    | ((
+        data: StickMotionEvent,
+        currentCameraNumber: number,
+        contect: AppService
+      ) => void)
+    | undefined;
+
+  //
+  // left-trigger motion
+  //
+  abstract proxyLeftTriggerMotion(data: AxisMotionData): void;
+  onLeftTriggerMotion(
+    callback: (
+      value: number,
+      currentCameraNumber: number,
+      context: AppService
+    ) => void
+  ): void {
+    this.leftTriggerMotionCallback = callback;
+  }
+  leftTriggerMotionCallback:
+    | ((
+        value: number,
+        currentCameraNumber: number,
+        contect: AppService
+      ) => void)
+    | undefined;
+
+  //
+  // right-trigger motion
+  //
+  abstract proxyRightTriggerMotion(data: AxisMotionData): void;
+  onRightTriggerMotion(
+    callback: (
+      value: number,
+      currentCameraNumber: number,
+      context: AppService
+    ) => void
+  ): void {
+    this.rightTriggerMotionCallback = callback;
+  }
+  rightTriggerMotionCallback:
+    | ((
+        value: number,
+        currentCameraNumber: number,
+        contect: AppService
+      ) => void)
+    | undefined;
+
+  //
+  // button down
+  //
+  abstract proxyButtonDown(data: ButtonPress): void;
+  onButtonDown(
+    callback: (
+      button: ButtonType,
+      currentCameraNumber: number,
+      context: AppService
+    ) => void
+  ): void {
+    this.buttonDownCallback = callback;
+  }
+  buttonDownCallback:
+    | ((
+        button: ButtonType,
+        currentCameraNumber: number,
+        contect: AppService
+      ) => void)
+    | undefined;
+
+  //
+  // left-shoulder button
+  //
+  abstract proxyLeftShoulderButton(data: ButtonPress): void;
+  onLeftShoulderButton(
+    callback: (
+      button: ButtonType,
+      currentCameraNumber: number,
+      context: AppService
+    ) => void
+  ): void {
+    this.leftShoulderButtonCallback = callback;
+  }
+  leftShoulderButtonCallback:
+    | ((
+        button: ButtonType,
+        currentCameraNumber: number,
+        contect: AppService
+      ) => void)
+    | undefined;
+
+  //
+  // right-shoulder button
+  //
+  abstract proxyRightShoulderButton(data: ButtonPress): void;
+  onRightShoulderButton(
+    callback: (
+      button: ButtonType,
+      currentCameraNumber: number,
+      context: AppService
+    ) => void
+  ): void {
+    this.rightShoulderButtonCallback = callback;
+  }
+  rightShoulderButtonCallback:
+    | ((
+        button: ButtonType,
+        currentCameraNumber: number,
+        contect: AppService
+      ) => void)
+    | undefined;
 
   protected nextCamera() {
     if (this.currentCameraNumber !== undefined) {
