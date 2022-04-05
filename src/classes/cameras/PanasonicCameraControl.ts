@@ -1,7 +1,5 @@
 import IPtzCameras from './PtzCameras';
-
-const axios = require('axios');
-
+import axios, {AxiosError} from 'axios';
 export default class PanasonicCameraControl extends IPtzCameras {
   constructor(
     cameraIdentifier: string,
@@ -157,15 +155,17 @@ export default class PanasonicCameraControl extends IPtzCameras {
   private async sendCommandInstantToPTZ(
     command: string
   ): Promise<string | undefined> {
+    const url =
+      'http://' + this.ip + '/cgi-bin/aw_ptz?cmd=%23' + command + '&res=1';
+    console.log(url);
     try {
-      const url =
-        'http://' + this.ip + '/cgi-bin/aw_ptz?cmd=%23' + command + '&res=1';
-      console.log(url);
-
-      const data = await axios.get(url);
+      const data = await axios.get(url, {timeout: 500});
       return data.data;
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      const error = err as Error | AxiosError;
+      console.log(
+        'Error sending command to camera: ' + error.message + ' ' + url
+      );
       return;
     }
   }
