@@ -34,12 +34,20 @@ abstract class Controller {
 
   abstract proxyLeftStickMotion(data: AxisMotionData): void;
   onLeftStickMotion(
-    callback: (data: StickMotionEvent, currentCameraNumber: number) => void
+    callback: (
+      data: StickMotionEvent,
+      currentCameraNumber: number,
+      context: AppService
+    ) => void
   ): void {
     this.leftStickMotionCallback = callback;
   }
   leftStickMotionCallback:
-    | ((data: StickMotionEvent, currentCameraNumber: number) => void)
+    | ((
+        data: StickMotionEvent,
+        currentCameraNumber: number,
+        context: AppService
+      ) => void)
     | undefined;
 
   abstract onRightStickMotion(data: AxisMotionData): void;

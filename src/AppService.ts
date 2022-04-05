@@ -30,8 +30,13 @@ class AppService {
     });
   }
 
-  mapLeftStickMotion(data: StickMotionEvent, currentCameraNumber: number) {
+  private mapLeftStickMotion(
+    data: StickMotionEvent,
+    currentCameraNumber: number,
+    appService: AppService
+  ) {
     console.log('Stick motion event:', data, ' on ', currentCameraNumber);
+    console.log(appService.cameras[currentCameraNumber]);
   }
 
   run() {

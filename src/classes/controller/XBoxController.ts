@@ -56,7 +56,8 @@ class XboxController extends Controller {
           if (this.leftStickMotionCallback) {
             this.leftStickMotionCallback(
               leftStickMotionEvent,
-              this.currentCameraNumber
+              this.currentCameraNumber,
+              this.appService
             );
           }
         }
@@ -77,7 +78,8 @@ class XboxController extends Controller {
           if (this.leftStickMotionCallback) {
             this.leftStickMotionCallback(
               leftStickMotionEvent,
-              this.currentCameraNumber
+              this.currentCameraNumber,
+              this.appService
             );
           }
         }
