@@ -42,7 +42,25 @@ class AppService {
     );
   }
 
-  private mapButtonDown() {}
+  private mapButtonDown(
+    button: ButtonType,
+    currentCameraNumber: number,
+    appService: AppService,
+    controller: Controller
+  ) {
+    if (button === 'back') controller.previousCamera();
+    if (button === 'guide') return;
+    if (button === 'start') controller.nextCamera();
+    if (
+      (button === 'back' || button === 'start') &&
+      currentCameraNumber !== undefined
+    ) {
+      console.log(
+        'Controller ' + controller.controllerId + ' selected camera:'
+      );
+      console.log(appService.cameras[controller.currentCameraNumber]);
+    }
+  }
   private mapLeftShoulderButton(
     button: ButtonType,
     currentCameraNumber: number,
@@ -152,6 +170,18 @@ class AppService {
       });
 
       // button down methods
+      Gamepad.on('back:down', data => {
+        if (data.player && this.controllers[data.player])
+          this.controllers[data.player].proxyButtonDown(data);
+      });
+      Gamepad.on('guide:down', data => {
+        if (data.player && this.controllers[data.player])
+          this.controllers[data.player].proxyButtonDown(data);
+      });
+      Gamepad.on('start:down', data => {
+        if (data.player && this.controllers[data.player])
+          this.controllers[data.player].proxyButtonDown(data);
+      });
       Gamepad.on('a:down', data => {
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].proxyButtonDown(data);
