@@ -18,13 +18,21 @@ This app allows to steer PTZ cameras with controllers like gamepads and joystick
    1. XBOX Wireless Gamepad
 
 # Getting started
-1. Copy the `config/default.demo.ts` file and rename it to `config/default.ts`.
-2. Edit your `config/default.ts` file according to the demo file and your configuration.
-3. Install dependencies with
+1. Install SDL2 as described in the [Readme of SDL2 package](https://github.com/IBM/sdl2-gamecontroller)
+
+For Linux **Ubuntu**:
+
+```sh
+sudo apt install -y build-essential cmake libsdl2-dev
+```
+
+2. Copy the `config/default.demo.ts` file and rename it to `config/default.ts`.
+3. Edit your `config/default.ts` file according to the demo file and your configuration.
+4. Install dependencies with
 ```
 npm install
 ```  
-4. Start application
+5. Start application
 ```
 npm run start
 ```
