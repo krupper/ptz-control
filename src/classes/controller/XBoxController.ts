@@ -32,14 +32,14 @@ class XboxController extends Controller {
   }
 
   proxyButtonDown(data: ButtonPress): void {
-    if (data.button === 'dpleft') this.previousCamera();
-    if (data.button === 'dpright') this.nextCamera();
-    if (
-      (data.button === 'dpleft' || data.button === 'dpright') &&
-      this.currentCameraNumber !== undefined
-    ) {
-      console.log('Controller ' + this.controllerId + ' selected camera:');
-      console.log(this.appService.cameras[this.currentCameraNumber]);
+    const controller = this as Controller;
+    if (this.buttonDownCallback) {
+      this.buttonDownCallback(
+        data.button,
+        this.currentCameraNumber,
+        this.appService,
+        controller
+      );
     }
   }
 

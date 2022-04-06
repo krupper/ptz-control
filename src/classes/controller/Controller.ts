@@ -67,7 +67,7 @@ abstract class Controller {
     | ((
         data: StickMotionEvent,
         currentCameraNumber: number,
-        contect: AppService
+        context: AppService
       ) => void)
     | undefined;
 
@@ -88,7 +88,7 @@ abstract class Controller {
     | ((
         value: number,
         currentCameraNumber: number,
-        contect: AppService
+        context: AppService
       ) => void)
     | undefined;
 
@@ -109,7 +109,7 @@ abstract class Controller {
     | ((
         value: number,
         currentCameraNumber: number,
-        contect: AppService
+        context: AppService
       ) => void)
     | undefined;
 
@@ -121,7 +121,8 @@ abstract class Controller {
     callback: (
       button: ButtonType,
       currentCameraNumber: number,
-      context: AppService
+      context: AppService,
+      controller: Controller
     ) => void
   ): void {
     this.buttonDownCallback = callback;
@@ -130,7 +131,8 @@ abstract class Controller {
     | ((
         button: ButtonType,
         currentCameraNumber: number,
-        contect: AppService
+        context: AppService,
+        controller: Controller
       ) => void)
     | undefined;
 
@@ -151,7 +153,7 @@ abstract class Controller {
     | ((
         button: ButtonType,
         currentCameraNumber: number,
-        contect: AppService
+        context: AppService
       ) => void)
     | undefined;
 
@@ -172,11 +174,11 @@ abstract class Controller {
     | ((
         button: ButtonType,
         currentCameraNumber: number,
-        contect: AppService
+        context: AppService
       ) => void)
     | undefined;
 
-  protected nextCamera() {
+  public nextCamera() {
     if (this.currentCameraNumber !== undefined) {
       if (this.currentCameraNumber + 1 >= this.appService.cameras.length) {
         this.selectCamera(0);
@@ -186,7 +188,7 @@ abstract class Controller {
     }
   }
 
-  protected previousCamera() {
+  public previousCamera() {
     if (this.currentCameraNumber !== undefined) {
       if (this.currentCameraNumber - 1 < 0) {
         this.selectCamera(this.appService.cameras.length - 1);
