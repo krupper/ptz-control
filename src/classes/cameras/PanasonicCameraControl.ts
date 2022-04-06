@@ -73,8 +73,8 @@ export default class PanasonicCameraControl extends IPtzCameras {
       console.log('Focus speed is out of range (-100 to 100). Value: ' + speed);
     }
 
-    // conversion to panasonic scale 0-99
-    const panasonic_focus = (0.495 * speed + 49.67)
+    // conversion to panasonic scale 01-99
+    const panasonic_focus = (0.49 * speed + 50)
       .toFixed()
       .toString()
       .padStart(2, '0');
