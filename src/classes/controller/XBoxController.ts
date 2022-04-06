@@ -3,6 +3,9 @@ import {AxisMotionData, ButtonPress} from 'sdl2-gamecontroller';
 import StickMotionEvent from '../../interfaces/IStickMotionEvent';
 import AppService from '../../AppService';
 class XboxController extends Controller {
+  // maximum stick motion driver value
+  private maxStickMotionValue = 32767;
+
   // Left stick
   private leftStickX = 0;
   private leftStickY = 0;
@@ -24,6 +27,8 @@ class XboxController extends Controller {
     controllerId: number
   ) {
     super(appService, product, manufacturer, controllerId);
+
+    this.maxStickMotionValue = this.cubicInEasing(this.maxStickMotionValue);
   }
 
   proxyButtonDown(data: ButtonPress): void {
@@ -40,8 +45,10 @@ class XboxController extends Controller {
 
   proxyLeftStickMotion(data: AxisMotionData) {
     if (data.button === 'leftx') {
-      // 32767 is a driver / controller specific maximum
-      this.leftStickX = data.value * (100 / 32767);
+      this.leftStickX = this.normalizeValue(
+        this.easeValue(data.value, 'cubic'),
+        this.maxStickMotionValue
+      );
 
       // detect related events
       if (this.leftStickTimestamp === data.timestamp) {
@@ -63,8 +70,10 @@ class XboxController extends Controller {
       this.leftStickTimestamp = data.timestamp;
     }
     if (data.button === 'lefty') {
-      // 32767 is a driver / controller specific maximum
-      this.leftStickY = data.value * (100 / 32767);
+      this.leftStickY = this.normalizeValue(
+        this.easeValue(data.value, 'cubic'),
+        this.maxStickMotionValue
+      );
 
       // detect related events
       if (this.leftStickTimestamp === data.timestamp) {
@@ -89,8 +98,10 @@ class XboxController extends Controller {
 
   proxyRightStickMotion(data: AxisMotionData): void {
     if (data.button === 'rightx') {
-      // 32767 is a driver / controller specific maximum
-      this.rightStickX = data.value * (100 / 32767);
+      this.rightStickX = this.normalizeValue(
+        this.easeValue(data.value, 'cubic'),
+        this.maxStickMotionValue
+      );
 
       // detect related events
       if (this.rightStickTimestamp === data.timestamp) {
@@ -111,8 +122,10 @@ class XboxController extends Controller {
       this.rightStickTimestamp = data.timestamp;
     }
     if (data.button === 'righty') {
-      // 32767 is a driver / controller specific maximum
-      this.rightStickY = data.value * (100 / 32767);
+      this.rightStickY = this.normalizeValue(
+        this.easeValue(data.value, 'cubic'),
+        this.maxStickMotionValue
+      );
 
       // detect related events
       if (this.rightStickTimestamp === data.timestamp) {
@@ -134,7 +147,7 @@ class XboxController extends Controller {
     }
   }
   proxyLeftTriggerMotion(data: AxisMotionData): void {
-    this.leftTrigger = data.value * (100 / 32767);
+    this.leftTrigger = data.value * (100 / this.maxStickMotionValue);
 
     // fire the callback function
     if (this.leftTriggerMotionCallback) {
@@ -146,7 +159,7 @@ class XboxController extends Controller {
     }
   }
   proxyRightTriggerMotion(data: AxisMotionData): void {
-    this.rightTrigger = data.value * (100 / 32767);
+    this.rightTrigger = data.value * (100 / this.maxStickMotionValue);
     // fire the callback function
     if (this.rightTriggerMotionCallback) {
       this.rightTriggerMotionCallback(
@@ -175,6 +188,10 @@ class XboxController extends Controller {
         this.appService
       );
     }
+  }
+
+  private cubicInEasing(value: number): number {
+    return value * value * value;
   }
 }
 
