@@ -26,9 +26,12 @@ For Linux **Ubuntu**:
 sudo apt install -y build-essential cmake libsdl2-dev
 ```
 
-2. Copy the `config/default.demo.ts` file and rename it to `config/default.ts`.
-3. Edit your `config/default.ts` file according to the demo file and your configuration.
-4. Install dependencies with
+2. Copy the demo configuration file to your own configuration file:
+```
+cp config/default.demo.ts config/default.ts
+```  
+4. Edit your `config/default.ts` file according to the demo file and your configuration.
+5. Install dependencies with
 ```
 npm install
 ```  
