@@ -21,10 +21,9 @@ class XboxController extends Controller {
     appService: AppService,
     product: string,
     manufacturer: string,
-    controllerId: number,
-    joystickDeviceIndex: number
+    controllerId: number
   ) {
-    super(appService, product, manufacturer, controllerId, joystickDeviceIndex);
+    super(appService, product, manufacturer, controllerId);
   }
 
   proxyButtonDown(data: ButtonPress): void {
@@ -40,100 +39,98 @@ class XboxController extends Controller {
   }
 
   proxyLeftStickMotion(data: AxisMotionData) {
-    // filter for this controller
-    if (data.player === this.controllerId) {
-      if (data.button === 'leftx') {
-        this.leftStickX = data.value * (100 / 32767);
+    if (data.button === 'leftx') {
+      // 32767 is a driver / controller specific maximum
+      this.leftStickX = data.value * (100 / 32767);
 
-        if (this.leftStickTimestamp < data.timestamp) {
-          const leftStickMotionEvent: StickMotionEvent = {
-            x: this.leftStickX,
-            y: this.leftStickY,
-          };
+      // detect related events
+      if (this.leftStickTimestamp === data.timestamp) {
+        const leftStickMotionEvent: StickMotionEvent = {
+          x: this.leftStickX,
+          y: this.leftStickY,
+        };
 
-          this.leftStickTimestamp = data.timestamp;
-
-          // fire the callback function
-          if (this.leftStickMotionCallback) {
-            this.leftStickMotionCallback(
-              leftStickMotionEvent,
-              this.currentCameraNumber,
-              this.appService
-            );
-          }
+        // fire the callback function
+        if (this.leftStickMotionCallback) {
+          this.leftStickMotionCallback(
+            leftStickMotionEvent,
+            this.currentCameraNumber,
+            this.appService
+          );
         }
       }
-      if (data.button === 'lefty') {
-        // filter for this controller
-        this.leftStickY = data.value * (100 / 32767);
 
-        if (this.leftStickTimestamp < data.timestamp) {
-          const leftStickMotionEvent: StickMotionEvent = {
-            x: this.leftStickX,
-            y: this.leftStickY,
-          };
+      this.leftStickTimestamp = data.timestamp;
+    }
+    if (data.button === 'lefty') {
+      // 32767 is a driver / controller specific maximum
+      this.leftStickY = data.value * (100 / 32767);
 
-          this.leftStickTimestamp = data.timestamp;
+      // detect related events
+      if (this.leftStickTimestamp === data.timestamp) {
+        const leftStickMotionEvent: StickMotionEvent = {
+          x: this.leftStickX,
+          y: this.leftStickY,
+        };
 
-          // fire the callback function
-          if (this.leftStickMotionCallback) {
-            this.leftStickMotionCallback(
-              leftStickMotionEvent,
-              this.currentCameraNumber,
-              this.appService
-            );
-          }
+        // fire the callback function
+        if (this.leftStickMotionCallback) {
+          this.leftStickMotionCallback(
+            leftStickMotionEvent,
+            this.currentCameraNumber,
+            this.appService
+          );
         }
       }
+
+      this.leftStickTimestamp = data.timestamp;
     }
   }
 
   proxyRightStickMotion(data: AxisMotionData): void {
-    // filter for this controller
-    if (data.player === this.controllerId) {
-      if (data.button === 'rightx') {
-        this.rightStickX = data.value * (100 / 32767);
+    if (data.button === 'rightx') {
+      // 32767 is a driver / controller specific maximum
+      this.rightStickX = data.value * (100 / 32767);
 
-        if (this.rightStickTimestamp < data.timestamp) {
-          const rightStickMotionEvent: StickMotionEvent = {
-            x: this.rightStickX,
-            y: this.rightStickY,
-          };
+      // detect related events
+      if (this.rightStickTimestamp === data.timestamp) {
+        const rightStickMotionEvent: StickMotionEvent = {
+          x: this.rightStickX,
+          y: this.rightStickY,
+        };
 
-          this.rightStickTimestamp = data.timestamp;
-
-          // fire the callback function
-          if (this.rightStickMotionCallback) {
-            this.rightStickMotionCallback(
-              rightStickMotionEvent,
-              this.currentCameraNumber,
-              this.appService
-            );
-          }
+        // fire the callback function
+        if (this.rightStickMotionCallback) {
+          this.rightStickMotionCallback(
+            rightStickMotionEvent,
+            this.currentCameraNumber,
+            this.appService
+          );
         }
       }
-      if (data.button === 'righty') {
-        // filter for this controller
-        this.rightStickY = data.value * (100 / 32767);
+      this.rightStickTimestamp = data.timestamp;
+    }
+    if (data.button === 'righty') {
+      // 32767 is a driver / controller specific maximum
+      this.rightStickY = data.value * (100 / 32767);
 
-        if (this.rightStickTimestamp < data.timestamp) {
-          const rightStickMotionEvent: StickMotionEvent = {
-            x: this.rightStickX,
-            y: this.rightStickY,
-          };
+      // detect related events
+      if (this.rightStickTimestamp === data.timestamp) {
+        const rightStickMotionEvent: StickMotionEvent = {
+          x: this.rightStickX,
+          y: this.rightStickY,
+        };
 
-          this.leftStickTimestamp = data.timestamp;
-
-          // fire the callback function
-          if (this.rightStickMotionCallback) {
-            this.rightStickMotionCallback(
-              rightStickMotionEvent,
-              this.currentCameraNumber,
-              this.appService
-            );
-          }
+        // fire the callback function
+        if (this.rightStickMotionCallback) {
+          this.rightStickMotionCallback(
+            rightStickMotionEvent,
+            this.currentCameraNumber,
+            this.appService
+          );
         }
       }
+      this.leftStickTimestamp = data.timestamp;
     }
   }
   proxyLeftTriggerMotion(data: AxisMotionData): void {

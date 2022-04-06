@@ -35,6 +35,8 @@ class AppService {
     currentCameraNumber: number,
     appService: AppService
   ) {
+    console.log(data.y);
+
     // send event to camera
     appService.cameras[currentCameraNumber]?.setPanTiltSpeed(
       data.x,
@@ -114,8 +116,7 @@ class AppService {
             this,
             'XBox Controller',
             'Microsoft',
-            data.player,
-            data.which
+            data.player
           );
         }
 
@@ -145,7 +146,7 @@ class AppService {
       Gamepad.on('controller-device-removed', data => {
         // remove controller from array
         this.controllers = this.controllers.filter(controller => {
-          return controller.joystickDeviceIndex !== data.which;
+          return controller.controllerId !== data.which;
         });
       });
 

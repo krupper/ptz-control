@@ -157,15 +157,16 @@ export default class PanasonicCameraControl extends IPtzCameras {
   ): Promise<string | undefined> {
     const url =
       'http://' + this.ip + '/cgi-bin/aw_ptz?cmd=%23' + command + '&res=1';
-    console.log(url);
+    // console.log(url);
     try {
       const data = await axios.get(url, {timeout: 500});
       return data.data;
     } catch (err) {
       const error = err as Error | AxiosError;
-      console.log(
-        'Error sending command to camera: ' + error.message + ' ' + url
-      );
+      //@ToDo: Reenable logging
+      // console.log(
+      //  'Error sending command to camera: ' + error.message + ' ' + url
+      //);
       return;
     }
   }
