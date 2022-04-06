@@ -27,8 +27,6 @@ class XboxController extends Controller {
     controllerId: number
   ) {
     super(appService, product, manufacturer, controllerId);
-
-    this.maxStickMotionValue = this.cubicInEasing(this.maxStickMotionValue);
   }
 
   proxyButtonDown(data: ButtonPress): void {
@@ -44,10 +42,14 @@ class XboxController extends Controller {
   }
 
   proxyLeftStickMotion(data: AxisMotionData) {
+    const maxStickMotionValueEased = this.easeValue(
+      this.maxStickMotionValue,
+      'cubic'
+    );
     if (data.button === 'leftx') {
       this.leftStickX = this.normalizeValue(
         this.easeValue(data.value, 'cubic'),
-        this.maxStickMotionValue
+        maxStickMotionValueEased
       );
 
       // detect related events
@@ -72,7 +74,7 @@ class XboxController extends Controller {
     if (data.button === 'lefty') {
       this.leftStickY = this.normalizeValue(
         this.easeValue(data.value, 'cubic'),
-        this.maxStickMotionValue
+        maxStickMotionValueEased
       );
 
       // detect related events
@@ -97,10 +99,15 @@ class XboxController extends Controller {
   }
 
   proxyRightStickMotion(data: AxisMotionData): void {
+    const maxStickMotionValueEased = this.easeValue(
+      this.maxStickMotionValue,
+      'cubic'
+    );
+
     if (data.button === 'rightx') {
       this.rightStickX = this.normalizeValue(
         this.easeValue(data.value, 'cubic'),
-        this.maxStickMotionValue
+        maxStickMotionValueEased
       );
 
       // detect related events
@@ -124,7 +131,7 @@ class XboxController extends Controller {
     if (data.button === 'righty') {
       this.rightStickY = this.normalizeValue(
         this.easeValue(data.value, 'cubic'),
-        this.maxStickMotionValue
+        maxStickMotionValueEased
       );
 
       // detect related events
