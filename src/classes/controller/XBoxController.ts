@@ -42,14 +42,10 @@ class XboxController extends Controller {
   }
 
   proxyLeftStickMotion(data: AxisMotionData) {
-    const maxStickMotionValueEased = this.easeValue(
-      this.maxStickMotionValue,
-      'cubic'
-    );
     if (data.button === 'leftx') {
-      this.leftStickX = this.normalizeValue(
-        this.easeValue(data.value, 'cubic'),
-        maxStickMotionValueEased
+      this.leftStickX = this.easeValue(
+        (data.value / this.maxStickMotionValue) * 100,
+        'cubic-bezier'
       );
 
       // detect related events
@@ -72,9 +68,9 @@ class XboxController extends Controller {
       this.leftStickTimestamp = data.timestamp;
     }
     if (data.button === 'lefty') {
-      this.leftStickY = this.normalizeValue(
-        this.easeValue(data.value, 'cubic'),
-        maxStickMotionValueEased
+      this.leftStickY = this.easeValue(
+        (data.value / this.maxStickMotionValue) * 100,
+        'cubic-bezier'
       );
 
       // detect related events
@@ -99,15 +95,10 @@ class XboxController extends Controller {
   }
 
   proxyRightStickMotion(data: AxisMotionData): void {
-    const maxStickMotionValueEased = this.easeValue(
-      this.maxStickMotionValue,
-      'cubic'
-    );
-
     if (data.button === 'rightx') {
-      this.rightStickX = this.normalizeValue(
-        this.easeValue(data.value, 'cubic'),
-        maxStickMotionValueEased
+      this.rightStickX = this.easeValue(
+        (data.value / this.maxStickMotionValue) * 100,
+        'cubic-bezier'
       );
 
       // detect related events
@@ -129,9 +120,9 @@ class XboxController extends Controller {
       this.rightStickTimestamp = data.timestamp;
     }
     if (data.button === 'righty') {
-      this.rightStickY = this.normalizeValue(
-        this.easeValue(data.value, 'cubic'),
-        maxStickMotionValueEased
+      this.rightStickY = this.easeValue(
+        (data.value / this.maxStickMotionValue) * 100,
+        'cubic-bezier'
       );
 
       // detect related events
@@ -154,7 +145,10 @@ class XboxController extends Controller {
     }
   }
   proxyLeftTriggerMotion(data: AxisMotionData): void {
-    this.leftTrigger = data.value * (100 / this.maxStickMotionValue);
+    this.leftTrigger = this.easeValue(
+      (data.value / this.maxStickMotionValue) * 100,
+      'cubic-bezier'
+    );
 
     // fire the callback function
     if (this.leftTriggerMotionCallback) {
@@ -166,7 +160,11 @@ class XboxController extends Controller {
     }
   }
   proxyRightTriggerMotion(data: AxisMotionData): void {
-    this.rightTrigger = data.value * (100 / this.maxStickMotionValue);
+    this.rightTrigger = this.easeValue(
+      (data.value / this.maxStickMotionValue) * 100,
+      'cubic-bezier'
+    );
+
     // fire the callback function
     if (this.rightTriggerMotionCallback) {
       this.rightTriggerMotionCallback(

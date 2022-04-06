@@ -2,6 +2,7 @@ import {AxisMotionData, ButtonPress, ButtonType} from 'sdl2-gamecontroller';
 import AppService from '../../AppService';
 import StickMotionEvent from '../../interfaces/IStickMotionEvent';
 import PtzCameras from '../cameras/PtzCameras';
+import BezierEasing from 'bezier-easing';
 abstract class Controller {
   appService: AppService;
   product: string;
@@ -206,33 +207,56 @@ abstract class Controller {
 
   protected easeValue(
     value: number,
-    easingFunction: 'quadratic' | 'cubic' | 'quartic' | 'quintic' | 'exponent-e'
+    easingFunction:
+      | 'quadratic'
+      | 'cubic'
+      | 'quartic'
+      | 'quintic'
+      | 'cubic-bezier'
   ): number {
+    let postive = 1;
+    if (value < 0) {
+      value *= -1;
+      postive = -1;
+    }
+
     if (easingFunction === 'quadratic') {
-      return value * value;
+      return this.normalizeValue(value * value, 100 * 100) * postive;
     }
 
     if (easingFunction === 'cubic') {
-      return value * value * value;
+      return (
+        this.normalizeValue(value * value * value, 100 * 100 * 100) * postive
+      );
     }
 
     if (easingFunction === 'quartic') {
-      return value * value * value * value;
+      return (
+        this.normalizeValue(
+          value * value * value * value,
+          100 * 100 * 100 * 100
+        ) * postive
+      );
     }
 
     if (easingFunction === 'quintic') {
-      return value * value * value * value * value;
+      return (
+        this.normalizeValue(
+          value * value * value * value * value,
+          100 * 100 * 100 * 100 * 100
+        ) * postive
+      );
     }
 
-    if (easingFunction === 'exponent-e') {
-      if (value <= 0) return 0;
-      return Math.pow(Math.E, 10 * (value - 1));
+    if (easingFunction === 'cubic-bezier') {
+      const easing = BezierEasing(0, 0, 0.72, 0.24);
+      return this.normalizeValue(easing(value / 100), easing(1)) * postive;
     }
 
     return value;
   }
 
-  protected normalizeValue(value: number, maximum: number): number {
+  private normalizeValue(value: number, maximum: number): number {
     return (value / maximum) * 100;
   }
 }

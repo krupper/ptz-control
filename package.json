@@ -30,10 +30,11 @@
     "typescript": "^4.0.3"
   },
   "dependencies": {
-    "axios": "^0.26.1",
-    "sdl2-gamecontroller": "^1.0.6",
     "@types/config": "^0.0.41",
+    "axios": "^0.26.1",
+    "bezier-easing": "^2.1.0",
     "config": "^3.3.7",
+    "sdl2-gamecontroller": "^1.0.6",
     "ts-node": "^10.7.0"
   },
   "engines": {
