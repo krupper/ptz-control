@@ -206,7 +206,7 @@ abstract class Controller {
 
   protected easeValue(
     value: number,
-    easingFunction: 'quadratic' | 'cubic' | 'quartic' | 'quintic'
+    easingFunction: 'quadratic' | 'cubic' | 'quartic' | 'quintic' | 'exponent-e'
   ): number {
     if (easingFunction === 'quadratic') {
       return value * value;
@@ -224,7 +224,7 @@ abstract class Controller {
       return value * value * value * value * value;
     }
 
-    if (easingFunction === 'e-exponent') {
+    if (easingFunction === 'exponent-e') {
       if (value <= 0) return 0;
       return Math.pow(Math.E, 10 * (value - 1));
     }
