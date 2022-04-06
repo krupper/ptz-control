@@ -20,6 +20,9 @@ export default class PanasonicCameraControl extends IPtzCameras {
   private irisMin = 1600;
   private irisMax = 4094;
   private panasonicMinimalMessageDelayInMs = 130;
+  private lastPanTiltSpeed: string | undefined;
+  private lastZoomSpeed: string | undefined;
+  private lastFocusSpeed: string | undefined;
   private importantEventsQueue: string[] = [];
 
   setPanTiltSpeed(pan: number, tilt: number) {
@@ -30,18 +33,18 @@ export default class PanasonicCameraControl extends IPtzCameras {
       console.log('Tilt speed is out of range (-100 to 100). Value: ' + tilt);
     }
 
-    // conversion to panasonic scale 0-99
-    const panasonic_pan = (0.495 * pan + 49.67)
+    // conversion to panasonic scale 01-99
+    const panasonic_pan = (0.49 * pan + 50)
       .toFixed()
       .toString()
       .padStart(2, '0');
-    const panasonic_tilt = (0.495 * tilt + 49.67)
+    const panasonic_tilt = (0.49 * tilt + 50)
       .toFixed()
       .toString()
       .padStart(2, '0');
     const command = 'PTS' + panasonic_pan + panasonic_tilt;
 
-    return this.sendCommandToPTZ(command, false);
+    return this.sendCommandToPTZ('panTiltSpeed', command, false);
   }
 
   setZoomSpeed(speed: number) {
@@ -49,20 +52,20 @@ export default class PanasonicCameraControl extends IPtzCameras {
       console.log('Zoom speed is out of range (-100 to 100). Value: ' + speed);
     }
 
-    // conversion to panasonic scale 0-99
-    const panasonic_zoom = (0.495 * speed + 49.67)
+    // conversion to panasonic scale 01-99
+    const panasonic_zoom = (0.49 * speed + 50)
       .toFixed()
       .toString()
       .padStart(2, '0');
     const command = 'Z' + panasonic_zoom;
-    // console.log(command);
+    console.log(command);
 
-    return this.sendCommandToPTZ(command, false);
+    return this.sendCommandToPTZ('zoomSpeed', command, false);
   }
 
   setAutoFocus(status: boolean) {
     const command = 'D1' + status ? '0' : '1';
-    this.sendCommandToPTZ(command, true);
+    this.sendCommandToPTZ('other', command, true);
   }
 
   setFocusSpeed(speed: number) {
@@ -77,12 +80,12 @@ export default class PanasonicCameraControl extends IPtzCameras {
       .padStart(2, '0');
     const command = 'Z' + panasonic_focus;
 
-    return this.sendCommandToPTZ(command, false);
+    return this.sendCommandToPTZ('focusSpeed', command, false);
   }
 
   setAutoIris(status: boolean) {
     const command = 'D3' + status ? '0' : '1';
-    this.sendCommandToPTZ(command, true);
+    this.sendCommandToPTZ('other', command, true);
   }
 
   stepIris(direction: 'up' | 'down', stepSize: number) {
@@ -123,7 +126,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       console.log('newIrisValue: ' + newIrisValue);
 
       const command = 'AXI' + newIrisValue;
-      this.sendCommandToPTZ(command, true);
+      this.sendCommandToPTZ('other', command, true);
     });
   }
 
@@ -135,21 +138,31 @@ export default class PanasonicCameraControl extends IPtzCameras {
       );
     }
     const command = 'R' + presetNumber;
-    this.sendCommandToPTZ(command, true);
+    this.sendCommandToPTZ('other', command, true);
   }
 
-  private sendCommandToPTZ(command: string, importantEvent: boolean): void {
-    if (this.importantEventsQueue.length && !importantEvent) {
-      // console.log(
-      //   'Skipped event due to Panasonic minimal message delay of ' +
-      //     this.panasonicMinimalMessageDelayInMs +
-      //     ' ms'
-      // );
+  private sendCommandToPTZ(
+    type: 'panTiltSpeed' | 'zoomSpeed' | 'focusSpeed' | 'other',
+    command: string,
+    importantEvent: boolean
+  ): void {
+    if (importantEvent) {
+      this.importantEventsQueue.push(command);
       return;
     }
-    // console.log(command);
-
-    this.importantEventsQueue.push(command);
+    switch (type) {
+      case 'panTiltSpeed':
+        this.lastPanTiltSpeed = command;
+        break;
+      case 'zoomSpeed':
+        this.lastZoomSpeed = command;
+        break;
+      case 'focusSpeed':
+        this.lastFocusSpeed = command;
+        break;
+      default:
+        break;
+    }
   }
 
   private async sendCommandInstantToPTZ(
@@ -157,23 +170,40 @@ export default class PanasonicCameraControl extends IPtzCameras {
   ): Promise<string | undefined> {
     const url =
       'http://' + this.ip + '/cgi-bin/aw_ptz?cmd=%23' + command + '&res=1';
-    // console.log(url);
+    console.log(url);
     try {
       const data = await axios.get(url, {timeout: 500});
       return data.data;
     } catch (err) {
       const error = err as Error | AxiosError;
-      //@ToDo: Reenable logging
-      // console.log(
-      //  'Error sending command to camera: ' + error.message + ' ' + url
-      //);
+      console.log(
+        'Error sending command to camera: ' + error.message + ' ' + url
+      );
       return;
     }
   }
 
   private runMessageQueue() {
-    const nextEvent = this.importantEventsQueue.shift();
-    if (nextEvent) this.sendCommandInstantToPTZ(nextEvent);
+    if (this.importantEventsQueue.length) {
+      const nextEvent = this.importantEventsQueue.shift();
+      if (nextEvent) this.sendCommandInstantToPTZ(nextEvent);
+      return;
+    }
+    if (this.lastPanTiltSpeed) {
+      this.sendCommandInstantToPTZ(this.lastPanTiltSpeed);
+      this.lastPanTiltSpeed = undefined;
+      return;
+    }
+    if (this.lastZoomSpeed) {
+      this.sendCommandInstantToPTZ(this.lastZoomSpeed);
+      this.lastZoomSpeed = undefined;
+      return;
+    }
+    if (this.lastFocusSpeed) {
+      this.sendCommandInstantToPTZ(this.lastFocusSpeed);
+      this.lastFocusSpeed = undefined;
+      return;
+    }
   }
 
   private hexToNumber(hex: string): number {

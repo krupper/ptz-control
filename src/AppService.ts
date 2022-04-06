@@ -35,8 +35,6 @@ class AppService {
     currentCameraNumber: number,
     appService: AppService
   ) {
-    console.log(data.y);
-
     // send event to camera
     appService.cameras[currentCameraNumber]?.setPanTiltSpeed(
       data.x,
@@ -228,6 +226,8 @@ class AppService {
           this.controllers[data.player].proxyRightShoulderButton(data);
       });
       Gamepad.on('lefttrigger', data => {
+        console.log(data);
+
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].proxyLeftTriggerMotion(data);
       });
