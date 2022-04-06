@@ -201,6 +201,38 @@ abstract class Controller {
     if (this.appService.cameras[cameraNumber])
       this.currentCameraObject = this.appService.cameras[cameraNumber];
   }
+
+  protected easeValue(
+    value: number,
+    easingFunction: 'quadratic' | 'cubic' | 'quartic' | 'quintic'
+  ): number {
+    if (easingFunction === 'quadratic') {
+      return value * value;
+    }
+
+    if (easingFunction === 'cubic') {
+      return value * value * value;
+    }
+
+    if (easingFunction === 'quartic') {
+      return value * value * value * value;
+    }
+
+    if (easingFunction === 'quintic') {
+      return value * value * value * value * value;
+    }
+
+    if (easingFunction === 'e-exponent') {
+      if (value <= 0) return 0;
+      return Math.pow(Math.E, 10 * (value - 1));
+    }
+
+    return value;
+  }
+
+  protected normalizeValue(value: number, maximum: number): number {
+    return (value / maximum) * 100;
+  }
 }
 
 export default Controller;
