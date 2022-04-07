@@ -24,6 +24,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
   private lastZoomSpeed: string | undefined;
   private lastFocusSpeed: string | undefined;
   private lastCommandIndex = 0;
+  private maxCommandRunsPerInterval = 6;
   private importantEventsQueue: string[] = [];
 
   setPanTiltSpeed(pan: number, tilt: number) {
@@ -185,27 +186,37 @@ export default class PanasonicCameraControl extends IPtzCameras {
   }
 
   private runMessageQueue() {
+    // prevent endless loops if no commands exists
+    if (this.maxCommandRunsPerInterval < 0) {
+      return;
+    }
+    this.maxCommandRunsPerInterval = 6;
+
     if (this.importantEventsQueue.length) {
       const nextEvent = this.importantEventsQueue.shift();
       if (nextEvent) this.sendCommandInstantToPTZ(nextEvent);
       return;
     }
+
     if (this.lastPanTiltSpeed && this.lastCommandIndex === 0) {
       this.sendCommandInstantToPTZ(this.lastPanTiltSpeed);
       this.lastPanTiltSpeed = undefined;
-      this.lastCommandIndex++;
       return;
     }
+    this.lastCommandIndex++;
+
     if (this.lastZoomSpeed && this.lastCommandIndex === 1) {
       this.sendCommandInstantToPTZ(this.lastZoomSpeed);
       this.lastZoomSpeed = undefined;
-      this.lastCommandIndex++;
       return;
     }
+    this.lastCommandIndex++;
+
     if (this.lastFocusSpeed && this.lastCommandIndex === 2) {
       this.sendCommandInstantToPTZ(this.lastFocusSpeed);
       this.lastFocusSpeed = undefined;
       this.lastCommandIndex = 0;
+      this.runMessageQueue();
       return;
     }
   }
