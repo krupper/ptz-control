@@ -39,3 +39,25 @@ npm install
 ```
 npm run start
 ```
+
+## Setup on pine64
+1. Install [latest Armbian](https://wiki.pine64.org/index.php/Pine_A64_Software_Release) ubuntu via balenaEtcher
+2. Install Node Version Manager
+```
+sudo apt install curl 
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+source ~/.profile
+nvm install node
+```
+4. Install PM2
+```
+npm install pm2@latest -g
+
+```
+6. Configure XBox Controller
+  ```
+  # Install driver
+  sudo apt-get install xboxdrv
+  # If ERTM is enabled, the controller won't pair with the Pi. To disable the ERTM, run the following command: 
+  echo 'options bluetooth disable_ertm=Y' | sudo tee -a /etc/modprobe.d/bluetooth.conf
+  ```
