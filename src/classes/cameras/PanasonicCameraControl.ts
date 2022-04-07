@@ -216,10 +216,11 @@ export default class PanasonicCameraControl extends IPtzCameras {
       this.sendCommandInstantToPTZ(this.lastFocusSpeed);
       this.lastFocusSpeed = undefined;
       this.lastCommandIndex = 0;
-      this.runMessageQueue();
       this.maxCommandRunsPerInterval--;
       return;
     }
+
+    this.runMessageQueue();
   }
 
   private hexToNumber(hex: string): number {
