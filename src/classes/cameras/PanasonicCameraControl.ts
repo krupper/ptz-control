@@ -188,9 +188,9 @@ export default class PanasonicCameraControl extends IPtzCameras {
   private runMessageQueue() {
     // prevent endless loops if no commands exists
     if (this.maxCommandRunsPerInterval < 0) {
+      this.maxCommandRunsPerInterval = 6;
       return;
     }
-    this.maxCommandRunsPerInterval = 6;
 
     if (this.importantEventsQueue.length) {
       const nextEvent = this.importantEventsQueue.shift();
@@ -217,6 +217,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       this.lastFocusSpeed = undefined;
       this.lastCommandIndex = 0;
       this.runMessageQueue();
+      this.maxCommandRunsPerInterval--;
       return;
     }
   }
