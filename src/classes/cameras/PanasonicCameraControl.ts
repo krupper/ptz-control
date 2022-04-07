@@ -1,57 +1,6 @@
 import IPtzCameras from './PtzCameras';
 import axios, {AxiosError} from 'axios';
-
 export default class PanasonicCameraControl extends IPtzCameras {
-  // Iris behaviour:
-  //    1366 - 1600 Iris closed
-  //    1601 - 4094 Iris open
-  private irisMin = 1600;
-  private irisMax = 4094;
-  private minimalCommandDelayInMs = 130;
-  private parameter = {
-    panTiltSpeed: {
-      command: 'panTilt',
-      wasSent: false,
-      value: {
-        pan: 0,
-        tilt: 0,
-      },
-    },
-    zoomSpeed: {
-      command: 'zoom',
-      wasSent: false,
-      value: 0,
-    },
-    focusSpeed: {
-      command: 'focus',
-      wasSent: false,
-      value: 0,
-    },
-    autoFocus: {
-      command: 'autoFocus',
-      wasSent: false,
-      value: false,
-    },
-    iris: {
-      command: 'iris',
-      wasSent: false,
-      value: '',
-    },
-    autoIris: {
-      command: 'autoIris',
-      wasSent: false,
-      value: false,
-    },
-    preset: {
-      command: 'preset',
-      wasSent: false,
-      value: 0,
-    },
-  };
-
-  private currentParameterIndex = 0;
-  private maxCommadSendAttempts: number;
-
   constructor(
     cameraIdentifier: string,
     vendor: string,
@@ -60,62 +9,29 @@ export default class PanasonicCameraControl extends IPtzCameras {
   ) {
     super(cameraIdentifier, vendor, model, ip);
 
-    // Specifies the number of attempts to send a command in one interval
-    this.maxCommadSendAttempts = Object.keys(this.parameter).length;
-
-    // fetch the current camera parameters
-    this.fetchCurrentParametes().then(() => {
-      // check for new commands to send
-      setInterval(() => {
-        this.processCommands();
-      }, this.minimalCommandDelayInMs);
-    });
+    setInterval(() => {
+      this.runMessageQueue();
+    }, this.panasonicMinimalMessageDelayInMs);
   }
 
-  private processCommands(): void {
-    // find the current parameter
-    // @ToDo: Fix typescript workaround for keyof typeof that.paramter. "this" does not work for a reason
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const that = this;
-    type ParameterIndex = keyof typeof that.parameter;
-    const name = Object.keys(this.parameter)[
-      this.currentParameterIndex
-    ] as ParameterIndex;
-    const currentParameter = this.parameter[name];
-
-    // skip to next parameter if the current parameter has not changed
-    if (currentParameter.wasSent) {
-      this.currentParameterIndex =
-        (this.currentParameterIndex + 1) % Object.keys(this.parameter).length;
-
-      // limits the number of attempts to prevent an endless loop in case no parameter changes
-      if (this.maxCommadSendAttempts >= 0) {
-        this.maxCommadSendAttempts--;
-        this.processCommands();
-      }
-
-      return;
-    }
-
-    this.sendCommandInstantToPTZ(currentParameter.command);
-    currentParameter.wasSent = true;
-
-    // increase the current index to the next parameter
-    this.currentParameterIndex =
-      (this.currentParameterIndex + 1) % Object.keys(this.parameter).length;
-
-    // Reset the number of attempts in one interval
-    this.maxCommadSendAttempts = Object.keys(this.parameter).length;
-  }
+  // Iris behaviour:
+  //    1366 - 1600 Iris closed
+  //    1601 - 4094 Iris open
+  private irisMin = 1600;
+  private irisMax = 4094;
+  private panasonicMinimalMessageDelayInMs = 130;
+  private lastPanTiltSpeed: string | undefined;
+  private lastZoomSpeed: string | undefined;
+  private lastFocusSpeed: string | undefined;
+  private lastCommandIndex = 0;
+  private importantEventsQueue: string[] = [];
 
   setPanTiltSpeed(pan: number, tilt: number) {
     if (pan < -100 || pan > 100) {
       console.log('Pan speed is out of range (-100 to 100). Value: ' + pan);
-      return;
     }
     if (tilt < -100 || tilt > 100) {
       console.log('Tilt speed is out of range (-100 to 100). Value: ' + tilt);
-      return;
     }
 
     // conversion to panasonic scale 01-99
@@ -129,16 +45,12 @@ export default class PanasonicCameraControl extends IPtzCameras {
       .padStart(2, '0');
     const command = 'PTS' + panasonic_pan + panasonic_tilt;
 
-    this.parameter.panTiltSpeed.command = command;
-    this.parameter.panTiltSpeed.wasSent = false;
-    this.parameter.panTiltSpeed.value.pan = pan;
-    this.parameter.panTiltSpeed.value.tilt = tilt;
+    return this.sendCommandToPTZ('panTiltSpeed', command, false);
   }
 
   setZoomSpeed(speed: number) {
     if (speed < -100 || speed > 100) {
       console.log('Zoom speed is out of range (-100 to 100). Value: ' + speed);
-      return;
     }
 
     // conversion to panasonic scale 01-99
@@ -149,24 +61,17 @@ export default class PanasonicCameraControl extends IPtzCameras {
     const command = 'Z' + panasonic_zoom;
     console.log(command);
 
-    // return this.sendCommandToPTZ('zoomSpeed', command, false);
-    this.parameter.zoomSpeed.command = command;
-    this.parameter.zoomSpeed.wasSent = false;
-    this.parameter.zoomSpeed.value = speed;
+    return this.sendCommandToPTZ('zoomSpeed', command, false);
   }
 
   setAutoFocus(status: boolean) {
     const command = 'D1' + status ? '0' : '1';
-
-    this.parameter.autoFocus.command = command;
-    this.parameter.autoFocus.wasSent = false;
-    this.parameter.autoFocus.value = status;
+    this.sendCommandToPTZ('other', command, true);
   }
 
   setFocusSpeed(speed: number) {
     if (speed < -100 || speed > 100) {
       console.log('Focus speed is out of range (-100 to 100). Value: ' + speed);
-      return;
     }
 
     // conversion to panasonic scale 01-99
@@ -176,49 +81,54 @@ export default class PanasonicCameraControl extends IPtzCameras {
       .padStart(2, '0');
     const command = 'Z' + panasonic_focus;
 
-    this.parameter.focusSpeed.command = command;
-    this.parameter.focusSpeed.wasSent = false;
-    this.parameter.focusSpeed.value = speed;
+    return this.sendCommandToPTZ('focusSpeed', command, false);
   }
 
   setAutoIris(status: boolean) {
     const command = 'D3' + status ? '0' : '1';
-
-    this.parameter.autoIris.command = command;
-    this.parameter.autoIris.wasSent = false;
-    this.parameter.autoIris.value = status;
+    this.sendCommandToPTZ('other', command, true);
   }
 
   stepIris(direction: 'up' | 'down', stepSize: number) {
-    let newIrisValue;
+    const get_command = 'AXI';
+    this.sendCommandInstantToPTZ(get_command).then(response => {
+      // extract value command
+      const currentIrisValue = response?.replace('axi', '');
+      console.log('currentIrisValue: ' + currentIrisValue);
 
-    if (direction === 'down') {
-      newIrisValue = this.previousHexStep(
-        this.parameter.iris.value,
-        stepSize,
-        this.irisMin,
-        this.irisMax
-      );
-    }
+      // check if value present
+      if (!currentIrisValue) {
+        console.log('Could not read current Iris value.');
+        return;
+      }
 
-    if (direction === 'up') {
-      newIrisValue = this.nextHexStep(
-        this.parameter.iris.value,
-        stepSize,
-        this.irisMin,
-        this.irisMax
-      );
-    }
+      let newIrisValue;
 
-    newIrisValue = newIrisValue?.toUpperCase();
+      if (direction === 'down') {
+        newIrisValue = this.previousHexStep(
+          currentIrisValue,
+          stepSize,
+          this.irisMin,
+          this.irisMax
+        );
+      }
 
-    console.log('newIrisValue: ' + newIrisValue);
+      if (direction === 'up') {
+        newIrisValue = this.nextHexStep(
+          currentIrisValue,
+          stepSize,
+          this.irisMin,
+          this.irisMax
+        );
+      }
 
-    const command = 'AXI' + newIrisValue;
+      newIrisValue = newIrisValue?.toUpperCase();
 
-    this.parameter.iris.command = command;
-    this.parameter.iris.wasSent = false;
-    this.parameter.iris.value = newIrisValue ? newIrisValue : '';
+      console.log('newIrisValue: ' + newIrisValue);
+
+      const command = 'AXI' + newIrisValue;
+      this.sendCommandToPTZ('other', command, true);
+    });
   }
 
   playbackPreset(presetNumber: number) {
@@ -227,13 +137,33 @@ export default class PanasonicCameraControl extends IPtzCameras {
         'Focus presetNumber is out of range (-100 to 100). Value: ' +
           presetNumber
       );
-      return;
     }
     const command = 'R' + presetNumber;
+    this.sendCommandToPTZ('other', command, true);
+  }
 
-    this.parameter.preset.command = command;
-    this.parameter.preset.wasSent = false;
-    this.parameter.preset.value = presetNumber;
+  private sendCommandToPTZ(
+    type: 'panTiltSpeed' | 'zoomSpeed' | 'focusSpeed' | 'other',
+    command: string,
+    importantEvent: boolean
+  ): void {
+    if (importantEvent) {
+      this.importantEventsQueue.push(command);
+      return;
+    }
+    switch (type) {
+      case 'panTiltSpeed':
+        this.lastPanTiltSpeed = command;
+        break;
+      case 'zoomSpeed':
+        this.lastZoomSpeed = command;
+        break;
+      case 'focusSpeed':
+        this.lastFocusSpeed = command;
+        break;
+      default:
+        break;
+    }
   }
 
   private async sendCommandInstantToPTZ(
@@ -254,45 +184,30 @@ export default class PanasonicCameraControl extends IPtzCameras {
     }
   }
 
-  private fetchCurrentParametes(): Promise<void> {
-    console.log('-- current camera paramters --');
-    const promises: Promise<void>[] = [];
-    // iris
-    promises[0] = new Promise((resolve, reject) => {
-      this.sendCommandInstantToPTZ('AXI').then(response => {
-        // extract value command
-        const currentIrisValue = response?.replace('axi', '');
-        this.parameter.iris.value = currentIrisValue ? currentIrisValue : '';
-
-        // check if value present
-        if (!currentIrisValue) {
-          console.log('Could not read current Iris value.');
-
-          reject();
-          return;
-        }
-        console.log('currentIrisValue: ' + currentIrisValue);
-        resolve();
-      });
-    });
-
-    // @ToDo: add the other paramters
-
-    return new Promise(resolve => {
-      Promise.all(promises)
-        .then(() => {
-          // all promises are resolved successfully
-          resolve();
-        })
-        .catch(() => {
-          // retry to fetch camera parameters because a parameter cannot be fetched before.
-          setTimeout(() => {
-            this.fetchCurrentParametes().then(() => {
-              resolve();
-            });
-          }, 3000);
-        });
-    });
+  private runMessageQueue() {
+    if (this.importantEventsQueue.length) {
+      const nextEvent = this.importantEventsQueue.shift();
+      if (nextEvent) this.sendCommandInstantToPTZ(nextEvent);
+      return;
+    }
+    if (this.lastPanTiltSpeed && this.lastCommandIndex === 0) {
+      this.sendCommandInstantToPTZ(this.lastPanTiltSpeed);
+      this.lastPanTiltSpeed = undefined;
+      this.lastCommandIndex++;
+      return;
+    }
+    if (this.lastZoomSpeed && this.lastCommandIndex === 1) {
+      this.sendCommandInstantToPTZ(this.lastZoomSpeed);
+      this.lastZoomSpeed = undefined;
+      this.lastCommandIndex++;
+      return;
+    }
+    if (this.lastFocusSpeed && this.lastCommandIndex === 2) {
+      this.sendCommandInstantToPTZ(this.lastFocusSpeed);
+      this.lastFocusSpeed = undefined;
+      this.lastCommandIndex = 0;
+      return;
+    }
   }
 
   private hexToNumber(hex: string): number {
