@@ -249,7 +249,7 @@ abstract class Controller {
     }
 
     if (easingFunction === 'cubic-bezier') {
-      const easing = BezierEasing(0, 0, 0.72, 0.24);
+      const easing = BezierEasing(0.46, 0, 1, 1);
       return this.normalizeValue(easing(value / 100), easing(1)) * postive;
     }
 
