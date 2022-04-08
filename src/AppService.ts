@@ -56,9 +56,18 @@ class AppService {
       currentCameraNumber !== undefined
     ) {
       console.log(
-        'Controller ' + controller.controllerId + ' selected camera:'
+        'Controller ' +
+          controller.controllerId +
+          ' selected camera: ' +
+          appService.cameras[controller.currentCameraNumber].cameraIdentifier +
+          ' on ip: ' +
+          appService.cameras[controller.currentCameraNumber].ip +
+          ' (' +
+          appService.cameras[controller.currentCameraNumber].vendor +
+          ' ' +
+          appService.cameras[controller.currentCameraNumber].model +
+          ')'
       );
-      console.log(appService.cameras[controller.currentCameraNumber]);
     }
   }
   private mapLeftShoulderButton(

@@ -1,5 +1,8 @@
 import IPtzCameras from './PtzCameras';
 import axios, {AxiosError} from 'axios';
+
+// build according to
+// https://eww.pass.panasonic.co.jp/pro-av/support/content/guide/DEF/HE50_120_IP/HDIntegratedCamera_InterfaceSpecifications-E.pdf
 export default class PanasonicCameraControl extends IPtzCameras {
   constructor(
     cameraIdentifier: string,
@@ -134,8 +137,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
   playbackPreset(presetNumber: number) {
     if (presetNumber < 0 || presetNumber > 99) {
       console.log(
-        'Focus presetNumber is out of range (-100 to 100). Value: ' +
-          presetNumber
+        'Preset Number is out of range (0 to 99). Value: ' + presetNumber
       );
     }
     const command = 'R' + presetNumber;
