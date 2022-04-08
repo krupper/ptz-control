@@ -104,7 +104,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       let newIrisValue;
 
       if (direction === 'down') {
-        newIrisValue = this.previousHexStep(
+        newIrisValue = PanasonicCameraControl.previousHexStep(
           currentIrisValue,
           stepSize,
           this.irisMin,
@@ -113,7 +113,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       }
 
       if (direction === 'up') {
-        newIrisValue = this.nextHexStep(
+        newIrisValue = PanasonicCameraControl.nextHexStep(
           currentIrisValue,
           stepSize,
           this.irisMin,
@@ -206,15 +206,15 @@ export default class PanasonicCameraControl extends IPtzCameras {
     }
   }
 
-  private hexToNumber(hex: string): number {
+  private static hexToNumber(hex: string): number {
     return parseInt(hex, 16);
   }
 
-  private numberToHex(number: number): string {
+  private static numberToHex(number: number): string {
     return number.toString(16);
   }
 
-  private nextHexStep(
+  private static nextHexStep(
     hex: string,
     step: number,
     min: number,
@@ -229,7 +229,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
     return this.numberToHex(number);
   }
 
-  private previousHexStep(
+  private static previousHexStep(
     hex: string,
     step: number,
     min: number,
