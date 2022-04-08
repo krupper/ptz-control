@@ -187,12 +187,10 @@ class AppService {
       });
       Gamepad.on('b:down', data => {
         Gamepad.rumble(60000, 40000, 100, data.player);
-        console.log('rumble');
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('x:down', data => {
-        console.log('rumbleTriggers');
         Gamepad.rumbleTriggers(40000, 40000, 100, data.player);
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].proxyButtonDown(data);
@@ -226,8 +224,6 @@ class AppService {
           this.controllers[data.player].proxyRightShoulderButton(data);
       });
       Gamepad.on('lefttrigger', data => {
-        console.log(data);
-
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].proxyLeftTriggerMotion(data);
       });

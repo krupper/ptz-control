@@ -24,6 +24,8 @@ export default class PanasonicCameraControl extends IPtzCameras {
   private lastZoomSpeed: string | undefined;
   private lastFocusSpeed: string | undefined;
   private importantEventsQueue: string[] = [];
+  private fluctualEventQueueRoundRobin = 0;
+  private fluctualEventQueueRoundRobinParticipants = 3; // pan-tilt speed, zoom speed, focus speed
 
   setPanTiltSpeed(pan: number, tilt: number) {
     if (pan < -100 || pan > 100) {
@@ -58,7 +60,6 @@ export default class PanasonicCameraControl extends IPtzCameras {
       .toString()
       .padStart(2, '0');
     const command = 'Z' + panasonic_zoom;
-    console.log(command);
 
     return this.sendCommandToPTZ('zoomSpeed', command, false);
   }
@@ -93,7 +94,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
     this.sendCommandInstantToPTZ(get_command).then(response => {
       // extract value command
       const currentIrisValue = response?.replace('axi', '');
-      console.log('currentIrisValue: ' + currentIrisValue);
+      // console.log('currentIrisValue: ' + currentIrisValue);
 
       // check if value present
       if (!currentIrisValue) {
@@ -123,7 +124,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
 
       newIrisValue = newIrisValue?.toUpperCase();
 
-      console.log('newIrisValue: ' + newIrisValue);
+      // console.log('newIrisValue: ' + newIrisValue);
 
       const command = 'AXI' + newIrisValue;
       this.sendCommandToPTZ('other', command, true);
@@ -185,25 +186,60 @@ export default class PanasonicCameraControl extends IPtzCameras {
 
   private runMessageQueue() {
     if (this.importantEventsQueue.length) {
-      const nextEvent = this.importantEventsQueue.shift();
-      if (nextEvent) this.sendCommandInstantToPTZ(nextEvent);
+      this.executeImportantEventsQueue();
       return;
     }
-    if (this.lastPanTiltSpeed) {
+    this.executeFluctualEventQueue();
+  }
+
+  private executeImportantEventsQueue() {
+    const nextEvent = this.importantEventsQueue.shift();
+    if (nextEvent) this.sendCommandInstantToPTZ(nextEvent);
+  }
+
+  private executeFluctualEventQueue() {
+    let commandExecuted = false;
+
+    // execute events with round robin logic
+    if (this.fluctualEventQueueRoundRobin === 0 && this.lastPanTiltSpeed) {
       this.sendCommandInstantToPTZ(this.lastPanTiltSpeed);
       this.lastPanTiltSpeed = undefined;
-      return;
-    }
-    if (this.lastZoomSpeed) {
+      commandExecuted = true;
+    } else if (this.fluctualEventQueueRoundRobin === 1 && this.lastZoomSpeed) {
       this.sendCommandInstantToPTZ(this.lastZoomSpeed);
       this.lastZoomSpeed = undefined;
-      return;
-    }
-    if (this.lastFocusSpeed) {
+      commandExecuted = true;
+    } else if (this.fluctualEventQueueRoundRobin === 2 && this.lastFocusSpeed) {
       this.sendCommandInstantToPTZ(this.lastFocusSpeed);
       this.lastFocusSpeed = undefined;
-      return;
+      commandExecuted = true;
     }
+
+    // iterate round robin & reset
+    this.iterateRoundRobin();
+
+    // if something was executed -> job done
+    if (commandExecuted) return;
+
+    // otherwise check if there are still remaining commands in the other fluctual queues
+    if (this.commandsAvailable()) {
+      this.executeFluctualEventQueue();
+    }
+  }
+
+  private commandsAvailable(): boolean {
+    return this.lastPanTiltSpeed || this.lastZoomSpeed || this.lastFocusSpeed
+      ? true
+      : false;
+  }
+
+  private iterateRoundRobin() {
+    this.fluctualEventQueueRoundRobin++;
+    if (
+      this.fluctualEventQueueRoundRobin >=
+      this.fluctualEventQueueRoundRobinParticipants
+    )
+      this.fluctualEventQueueRoundRobin = 0;
   }
 
   private static hexToNumber(hex: string): number {
