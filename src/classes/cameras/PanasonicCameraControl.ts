@@ -14,15 +14,15 @@ export default class PanasonicCameraControl extends IPtzCameras {
 
     setInterval(() => {
       this.runMessageQueue();
-    }, this.panasonicMinimalMessageDelayInMs);
+    }, PanasonicCameraControl.panasonicMinimalMessageDelayInMs);
   }
 
   // Iris behaviour:
   //    1366 - 1600 Iris closed
   //    1601 - 4094 Iris open
-  private irisMin = 1600;
-  private irisMax = 4094;
-  private panasonicMinimalMessageDelayInMs = 130;
+  private static irisMin = 1600;
+  private static irisMax = 4094;
+  private static panasonicMinimalMessageDelayInMs = 130; // taken from panasonic specifications
   private lastPanTiltSpeed: string | undefined;
   private lastZoomSpeed: string | undefined;
   private lastFocusSpeed: string | undefined;
@@ -111,8 +111,8 @@ export default class PanasonicCameraControl extends IPtzCameras {
         newIrisValue = PanasonicCameraControl.previousHexStep(
           currentIrisValue,
           stepSize,
-          this.irisMin,
-          this.irisMax
+          PanasonicCameraControl.irisMin,
+          PanasonicCameraControl.irisMax
         );
       }
 
@@ -120,8 +120,8 @@ export default class PanasonicCameraControl extends IPtzCameras {
         newIrisValue = PanasonicCameraControl.nextHexStep(
           currentIrisValue,
           stepSize,
-          this.irisMin,
-          this.irisMax
+          PanasonicCameraControl.irisMin,
+          PanasonicCameraControl.irisMax
         );
       }
 
