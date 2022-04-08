@@ -72,6 +72,33 @@ export default class PanasonicCameraControl extends IPtzCameras {
     this.sendCommandToPTZ('other', command, true);
   }
 
+  toggleAutoFocus() {
+    const get_command = 'D1';
+    return this.sendCommandInstantToPTZ(get_command).then(response => {
+      // extract value command
+      const currentAutoFocusState = response?.replace('d1', '');
+
+      // check if value present
+      if (!currentAutoFocusState) {
+        console.log('Could not read current auto focus state.');
+        return;
+      }
+
+      let newAutoFocusState: boolean;
+      if (currentAutoFocusState === '0') {
+        newAutoFocusState = true;
+      } else {
+        newAutoFocusState = false;
+      }
+
+      const command = 'D1' + (newAutoFocusState ? '1' : '0');
+      this.sendCommandToPTZ('other', command, true);
+
+      // return state
+      return Promise.resolve(newAutoFocusState);
+    });
+  }
+
   setFocusSpeed(speed: number) {
     if (speed < -100 || speed > 100) {
       console.log('Focus speed is out of range (-100 to 100). Value: ' + speed);
@@ -82,7 +109,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       .toFixed()
       .toString()
       .padStart(2, '0');
-    const command = 'Z' + panasonic_focus;
+    const command = 'F' + panasonic_focus;
 
     return this.sendCommandToPTZ('focusSpeed', command, false);
   }
@@ -90,6 +117,33 @@ export default class PanasonicCameraControl extends IPtzCameras {
   setAutoIris(status: boolean) {
     const command = 'D3' + status ? '0' : '1';
     this.sendCommandToPTZ('other', command, true);
+  }
+
+  toggleAutoIris() {
+    const get_command = 'D3';
+    return this.sendCommandInstantToPTZ(get_command).then(response => {
+      // extract value command
+      const currentAutoIrisState = response?.replace('d3', '');
+
+      // check if value present
+      if (!currentAutoIrisState) {
+        console.log('Could not read current auto iris state.');
+        return;
+      }
+
+      let newAutoIrisState: boolean;
+      if (currentAutoIrisState === '0') {
+        newAutoIrisState = true;
+      } else {
+        newAutoIrisState = false;
+      }
+
+      const command = 'D3' + (newAutoIrisState ? '1' : '0');
+      this.sendCommandToPTZ('other', command, true);
+
+      // return state
+      return Promise.resolve(newAutoIrisState);
+    });
   }
 
   stepIris(direction: 'up' | 'down', stepSize: number) {
@@ -140,7 +194,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
         'Preset Number is out of range (0 to 99). Value: ' + presetNumber
       );
     }
-    const command = 'R' + presetNumber;
+    const command = 'R' + presetNumber.toString().padStart(2, '0');
     this.sendCommandToPTZ('other', command, true);
   }
 

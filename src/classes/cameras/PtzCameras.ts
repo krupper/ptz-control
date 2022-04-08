@@ -20,9 +20,11 @@ abstract class PtzCameras {
   abstract setZoomSpeed(speed: number): void;
 
   abstract setAutoFocus(status: boolean): void;
+  abstract toggleAutoFocus(): Promise<boolean | undefined>;
   abstract setFocusSpeed(speed: number): void;
 
   abstract setAutoIris(staÍtus: boolean): void;
+  abstract toggleAutoIris(): Promise<boolean | undefined>;
   abstract stepIris(direction: 'up' | 'down', stepSize: number): void;
 
   abstract playbackPreset(presetNumber: number): void;

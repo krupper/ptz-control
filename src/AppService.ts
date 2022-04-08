@@ -42,15 +42,32 @@ class AppService {
     );
   }
 
+  private sendControllerCameraNumberRumbleFeedback(controller: Controller) {
+    for (
+      let rumbled = 0;
+      rumbled < controller.currentCameraNumber + 1;
+      rumbled++
+    ) {
+      setTimeout(() => {
+        Gamepad.rumbleTriggers(30000, 30000, 200, controller.controllerId);
+      }, rumbled * 400);
+    }
+  }
+
   private mapButtonDown(
     button: ButtonType,
     currentCameraNumber: number,
     appService: AppService,
     controller: Controller
   ) {
-    if (button === 'back') controller.previousCamera();
-    if (button === 'guide') return;
-    if (button === 'start') controller.nextCamera();
+    if (button === 'back') {
+      controller.previousCamera();
+      appService.sendControllerCameraNumberRumbleFeedback(controller);
+    }
+    if (button === 'start') {
+      controller.nextCamera();
+      appService.sendControllerCameraNumberRumbleFeedback(controller);
+    }
     if (
       (button === 'back' || button === 'start') &&
       currentCameraNumber !== undefined
@@ -69,6 +86,36 @@ class AppService {
           ')'
       );
     }
+    if (button === 'dpdown') {
+      appService.cameras[controller.currentCameraNumber]
+        .toggleAutoFocus()
+        .then(status => {
+          if (status) {
+            Gamepad.rumble(20000, 20000, 200, controller.controllerId);
+          } else {
+            Gamepad.rumble(40000, 40000, 600, controller.controllerId);
+          }
+        });
+    }
+    if (button === 'dpup') {
+      appService.cameras[controller.currentCameraNumber]
+        .toggleAutoIris()
+        .then(status => {
+          if (status) {
+            Gamepad.rumbleTriggers(20000, 20000, 200, controller.controllerId);
+          } else {
+            Gamepad.rumbleTriggers(40000, 40000, 600, controller.controllerId);
+          }
+        });
+    }
+    if (button === 'y')
+      appService.cameras[controller.currentCameraNumber].playbackPreset(1);
+    if (button === 'x')
+      appService.cameras[controller.currentCameraNumber].playbackPreset(2);
+    if (button === 'b')
+      appService.cameras[controller.currentCameraNumber].playbackPreset(3);
+    if (button === 'a')
+      appService.cameras[controller.currentCameraNumber].playbackPreset(4);
   }
   private mapLeftShoulderButton(
     button: ButtonType,
@@ -146,6 +193,9 @@ class AppService {
           newController.onRightTriggerMotion(this.mapRightTriggerMotion);
 
           this.controllers[data.player] = newController;
+
+          // rumble initial to signal connection and camera number
+          this.sendControllerCameraNumberRumbleFeedback(newController);
         }
       });
 
