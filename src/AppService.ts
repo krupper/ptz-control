@@ -165,7 +165,10 @@ class AppService {
         let newController: Controller | undefined = undefined;
 
         // if controller is: Xbox Series X Controller
-        if (data.vendor_id === 1118 && data.product_id === 2835) {
+        if (
+          data.vendor_id === 1118 &&
+          (data.product_id === 2835 || data.product_id === 736)
+        ) {
           newController = new XboxController(
             this,
             'XBox Controller',
