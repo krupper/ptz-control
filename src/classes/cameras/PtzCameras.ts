@@ -22,6 +22,7 @@ abstract class PtzCameras {
   abstract setAutoFocus(status: boolean): void;
   abstract toggleAutoFocus(): Promise<boolean | undefined>;
   abstract setFocusSpeed(speed: number): void;
+  abstract stepFocus(direction: 'near' | 'far', stepSize: number): void;
 
   abstract setAutoIris(staÍtus: boolean): void;
   abstract toggleAutoIris(): Promise<boolean | undefined>;

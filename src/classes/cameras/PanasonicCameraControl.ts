@@ -119,6 +119,48 @@ export default class PanasonicCameraControl extends IPtzCameras {
     this.sendCommandToPTZ('other', command, true);
   }
 
+  stepFocus(direction: 'near' | 'far', stepSize: number) {
+    const get_command = 'AXF';
+    this.sendCommandInstantToPTZ(get_command).then(response => {
+      // extract value command
+      const currentFocusValue = response?.replace('axf', '');
+      // console.log('currentFocusValue: ' + currentFocusValue);
+
+      // check if value present
+      if (!currentFocusValue) {
+        console.log('Could not read current Focus value.');
+        return;
+      }
+
+      let newFocusValue;
+
+      if (direction === 'near') {
+        newFocusValue = PanasonicCameraControl.previousHexStep(
+          currentFocusValue,
+          stepSize,
+          PanasonicCameraControl.irisMin,
+          PanasonicCameraControl.irisMax
+        );
+      }
+
+      if (direction === 'far') {
+        newFocusValue = PanasonicCameraControl.nextHexStep(
+          currentFocusValue,
+          stepSize,
+          PanasonicCameraControl.irisMin,
+          PanasonicCameraControl.irisMax
+        );
+      }
+
+      newFocusValue = newFocusValue?.toUpperCase();
+
+      // console.log('newFocusValue: ' + newFocusValue);
+
+      const command = 'AXF' + newFocusValue;
+      this.sendCommandToPTZ('other', command, true);
+    });
+  }
+
   toggleAutoIris() {
     const get_command = 'D3';
     return this.sendCommandInstantToPTZ(get_command).then(response => {

@@ -10,11 +10,17 @@ class XboxController extends Controller {
   private leftStickX = 0;
   private leftStickY = 0;
   private leftStickTimestamp = 0;
+  private leftStickSpeedRate = 1.5;
 
   // Right stick
   private rightStickX = 0;
   private rightStickY = 0;
   private rightStickTimestamp = 0;
+  private rightStickSpeedRate = 1.8;
+
+  // trigger left and right
+  private leftTriggerSpeedRate = 1.8;
+  private rightTriggerSpeedRate = 1.8;
 
   // trigger
   private leftTrigger = 0;
@@ -42,6 +48,8 @@ class XboxController extends Controller {
   }
 
   proxyLeftStickMotion(data: AxisMotionData) {
+    data.value = data.value / this.leftStickSpeedRate;
+
     if (data.button === 'leftx') {
       this.leftStickX = this.easeValue(
         (data.value / this.maxStickMotionValue) * 100,
@@ -95,6 +103,8 @@ class XboxController extends Controller {
   }
 
   proxyRightStickMotion(data: AxisMotionData): void {
+    data.value = data.value / this.rightStickSpeedRate;
+
     if (data.button === 'rightx') {
       this.rightStickX = this.easeValue(
         (data.value / this.maxStickMotionValue) * 100,
@@ -145,6 +155,7 @@ class XboxController extends Controller {
     }
   }
   proxyLeftTriggerMotion(data: AxisMotionData): void {
+    data.value = data.value / this.leftTriggerSpeedRate;
     this.leftTrigger = this.easeValue(
       (data.value / this.maxStickMotionValue) * 100,
       'cubic-bezier'
@@ -160,6 +171,7 @@ class XboxController extends Controller {
     }
   }
   proxyRightTriggerMotion(data: AxisMotionData): void {
+    data.value = data.value / this.rightTriggerSpeedRate;
     this.rightTrigger = this.easeValue(
       (data.value / this.maxStickMotionValue) * 100,
       'cubic-bezier'

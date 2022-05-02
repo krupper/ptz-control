@@ -108,6 +108,12 @@ class AppService {
           }
         });
     }
+    if (button === 'dpleft') {
+      appService.cameras[currentCameraNumber]?.stepFocus('near', 20);
+    }
+    if (button === 'dpright') {
+      appService.cameras[currentCameraNumber]?.stepFocus('far', 20);
+    }
     if (button === 'y')
       appService.cameras[controller.currentCameraNumber].playbackPreset(1);
     if (button === 'x')
