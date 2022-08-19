@@ -49,7 +49,7 @@ class AppService {
       rumbled++
     ) {
       setTimeout(() => {
-        Gamepad.rumbleTriggers(30000, 30000, 200, controller.controllerId);
+        Gamepad.rumble(30000, 30000, 200, controller.controllerId);
       }, rumbled * 400);
     }
   }
@@ -102,9 +102,9 @@ class AppService {
         .toggleAutoIris()
         .then(status => {
           if (status) {
-            Gamepad.rumbleTriggers(20000, 20000, 200, controller.controllerId);
+            Gamepad.rumble(20000, 20000, 200, controller.controllerId);
           } else {
-            Gamepad.rumbleTriggers(40000, 40000, 600, controller.controllerId);
+            Gamepad.rumble(40000, 40000, 600, controller.controllerId);
           }
         });
     }
@@ -263,7 +263,7 @@ class AppService {
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('x:down', data => {
-        Gamepad.rumbleTriggers(40000, 40000, 100, data.player);
+        Gamepad.rumble(40000, 40000, 100, data.player);
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].proxyButtonDown(data);
       });
