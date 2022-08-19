@@ -258,12 +258,10 @@ class AppService {
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('b:down', data => {
-        Gamepad.rumble(60000, 40000, 100, data.player);
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('x:down', data => {
-        Gamepad.rumble(40000, 40000, 100, data.player);
         if (data.player && this.controllers[data.player])
           this.controllers[data.player].proxyButtonDown(data);
       });
