@@ -173,7 +173,9 @@ class AppService {
         // if controller is: Xbox Series X Controller
         if (
           data.vendor_id === 1118 &&
-          (data.product_id === 2835 || data.product_id === 736)
+          (data.product_id === 2835 ||
+            data.product_id === 2834 ||
+            data.product_id === 736)
         ) {
           newController = new XboxController(
             this,
@@ -181,6 +183,8 @@ class AppService {
             'Microsoft',
             data.player
           );
+        } else {
+          console.log('Controller not supported');
         }
 
         // store new controller
