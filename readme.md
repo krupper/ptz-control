@@ -28,7 +28,8 @@ sudo apt install -y build-essential cmake libsdl2-dev
 
 2. Copy the `config/default.demo.ts` file and rename it to `config/default.ts`.
 3. Edit your `config/default.ts` file according to the demo file and your configuration.
-4. Install dependencies with
+4. Install xone as described [here](https://github.com/medusalix/xone)
+5. Install dependencies with
 ```
 npm install
 ```  
