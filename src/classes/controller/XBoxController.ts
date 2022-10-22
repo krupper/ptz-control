@@ -16,7 +16,7 @@ class XboxController extends Controller {
   private rightStickX = 0;
   private rightStickY = 0;
   private rightStickTimestamp = 0;
-  private rightStickSpeedRate = 1.8;
+  private rightStickSpeedRate = 2;
 
   // trigger left and right
   private leftTriggerSpeedRate = 1.8;
