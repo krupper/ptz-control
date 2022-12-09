@@ -18,6 +18,7 @@ abstract class PtzCameras {
 
   abstract setPanTiltSpeed(pan: number, tilt: number): void;
   abstract setZoomSpeed(speed: number): void;
+  abstract toggleAutoZoom(speed: number): void;
 
   abstract setAutoFocus(status: boolean): void;
   abstract toggleAutoFocus(): Promise<boolean | undefined>;

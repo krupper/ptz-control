@@ -1,5 +1,5 @@
 import IPtzCameras from './PtzCameras';
-import axios, {AxiosError} from 'axios';
+import axios, { AxiosError } from 'axios';
 
 // build according to
 // https://eww.pass.panasonic.co.jp/pro-av/support/content/guide/DEF/HE50_120_IP/HDIntegratedCamera_InterfaceSpecifications-E.pdf
@@ -26,6 +26,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
   private lastPanTiltSpeed: string | undefined;
   private lastZoomSpeed: string | undefined;
   private lastFocusSpeed: string | undefined;
+  private currentZoomSpeed: number | undefined;
   private importantEventsQueue: string[] = [];
   private fluctualEventQueueRoundRobin = 0;
   private fluctualEventQueueRoundRobinParticipants = 3; // pan-tilt speed, zoom speed, focus speed
@@ -57,6 +58,9 @@ export default class PanasonicCameraControl extends IPtzCameras {
       console.log('Zoom speed is out of range (-100 to 100). Value: ' + speed);
     }
 
+    // set current zoom speed (zoom speed can not be queried from the camera so we have to save it)
+    this.currentZoomSpeed = speed;
+
     // conversion to panasonic scale 01-99
     const panasonic_zoom = (0.49 * speed + 50)
       .toFixed()
@@ -65,6 +69,27 @@ export default class PanasonicCameraControl extends IPtzCameras {
     const command = 'Z' + panasonic_zoom;
 
     return this.sendCommandToPTZ('zoomSpeed', command, false);
+  }
+
+  toggleAutoZoom(speed: number) {
+    // check if value present
+    if (!this.currentZoomSpeed) {
+      console.log('Could not read current zoom state.');
+      return;
+    }
+
+    let newZoomSpeed: number;
+    const thresholdForZoomSpeedInterpretedAsOff = 5;
+
+    // set new zoom speed or stop zoom
+    if (this.currentZoomSpeed < thresholdForZoomSpeedInterpretedAsOff
+      && this.currentZoomSpeed > thresholdForZoomSpeedInterpretedAsOff * -1) {
+      newZoomSpeed = speed;
+    } else {
+      newZoomSpeed = 0;
+    }
+
+    return this.setZoomSpeed(newZoomSpeed);
   }
 
   setAutoFocus(status: boolean) {
@@ -271,7 +296,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       'http://' + this.ip + '/cgi-bin/aw_ptz?cmd=%23' + command + '&res=1';
     console.log(url);
     try {
-      const data = await axios.get(url, {timeout: 500});
+      const data = await axios.get(url, { timeout: 500 });
       return data.data;
     } catch (err) {
       const error = err as Error | AxiosError;
