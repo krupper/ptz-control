@@ -1,5 +1,6 @@
 import IPtzCameras from './PtzCameras';
 import axios, { AxiosError } from 'axios';
+import anime, { EasingOptions } from 'animejs';
 
 // build according to
 // https://eww.pass.panasonic.co.jp/pro-av/support/content/guide/DEF/HE50_120_IP/HDIntegratedCamera_InterfaceSpecifications-E.pdf
@@ -78,18 +79,34 @@ export default class PanasonicCameraControl extends IPtzCameras {
       return;
     }
 
-    let newZoomSpeed: number;
     const thresholdForZoomSpeedInterpretedAsOff = 5;
 
     // set new zoom speed or stop zoom
     if (this.currentZoomSpeed < thresholdForZoomSpeedInterpretedAsOff
       && this.currentZoomSpeed > thresholdForZoomSpeedInterpretedAsOff * -1) {
-      newZoomSpeed = speed;
+      this.fadeToZoom(speed, 'easeInSine');
     } else {
-      newZoomSpeed = 0;
+      this.fadeToZoom(0, 'easeOutSine');
     }
 
-    return this.setZoomSpeed(newZoomSpeed);
+    // return this.setZoomSpeed(newZoomSpeed);
+  }
+
+  fadeToZoom(speed: number, easing: EasingOptions) {
+    let speedObject = {
+      newSpeed: speed
+    };
+
+    anime({
+      targets: speedObject,
+      newSpeed: speed,
+      round: 1,
+      duration: 1000,
+      easing: easing,
+      update: () => {
+        this.setZoomSpeed(speedObject.newSpeed);
+      }
+    });
   }
 
   setAutoFocus(status: boolean) {
