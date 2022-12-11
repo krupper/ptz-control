@@ -109,7 +109,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       if (!easeFunction) return;
 
       // calculate speed
-      const calculatedSpeed = easeFunction(timeLeft)*endZoomSpeed;
+      const calculatedSpeed = easeFunction(timeLeft-1)*endZoomSpeed;
       this.setZoomSpeed(calculatedSpeed);
       console.log(calculatedSpeed);
       
