@@ -58,6 +58,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
   setZoomSpeed(speed: number) {
     if (speed < -100 || speed > 100) {
       console.log('Zoom speed is out of range (-100 to 100). Value: ' + speed);
+      return;
     }
 
     // set current zoom speed (zoom speed can not be queried from the camera so we have to save it)
@@ -95,7 +96,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       direction = -1;
     }
 
-    const zoomSpan = Math.abs(this.currentZoomSpeed - endZoomSpeed);
+    const zoomSpan = Math.abs(endZoomSpeed - this.currentZoomSpeed);
 
     // clear ongoing auto-zoom-animations
     if (this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
@@ -113,15 +114,15 @@ export default class PanasonicCameraControl extends IPtzCameras {
       if (direction) {
         this.setZoomSpeed(startZoom + calculatedSpeed)
         console.log(startZoom + calculatedSpeed);
-        
+
       } else {
         this.setZoomSpeed(startZoom - calculatedSpeed)
         console.log(startZoom - calculatedSpeed);
-        
+
       }
 
-      
-      
+
+
 
       animationTime = animationTime + 0.05;
     }, 20);
