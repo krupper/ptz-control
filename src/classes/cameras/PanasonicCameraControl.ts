@@ -90,7 +90,8 @@ export default class PanasonicCameraControl extends IPtzCameras {
   fadeToZoom(endZoomSpeed: number) {
     const startZoomSpeed = this.currentZoomSpeed;
     const zoomDifference = Math.abs(endZoomSpeed - startZoomSpeed);
-    const zoomDirection = endZoomSpeed - startZoomSpeed >= 0 ? 0 : 1;
+    const zoomToggleValue = endZoomSpeed - startZoomSpeed >= 0 ? 0 : 1;
+    const zoomDirection = endZoomSpeed - startZoomSpeed > 0 ? 1 : -1;
 
     // clear ongoing auto-zoom-animations
     if (this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
@@ -104,8 +105,8 @@ export default class PanasonicCameraControl extends IPtzCameras {
       if (animationTime > 1 && this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
 
       // calculate speed
-      const calculatedSpeed = easeFunction(Math.abs(zoomDirection - animationTime)) * zoomDifference;
-      this.setZoomSpeed(calculatedSpeed);
+      const calculatedSpeed = easeFunction(Math.abs(zoomToggleValue - animationTime)) * zoomDifference;
+      this.setZoomSpeed(calculatedSpeed*zoomDirection);
       console.log(calculatedSpeed);
 
       animationTime = animationTime + 0.05;
