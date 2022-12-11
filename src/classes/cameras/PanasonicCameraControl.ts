@@ -95,25 +95,25 @@ export default class PanasonicCameraControl extends IPtzCameras {
 
   fadeToZoom(endZoomSpeed: number, easing: 'ease-in' | 'ease-out') {
     const startZoomSpeed = this.currentZoomSpeed;
-    let timeLeft = 1;
+    let animationTime = 0;
     let easeFunction: undefined | BezierEasing.EasingFunction = undefined;
     
-    if (easing === 'ease-in') easeFunction = BezierEasing(0.46, 0, 1, 1);
-    if (easing === 'ease-out') easeFunction = BezierEasing(0.46, 0, 1, 1);
+    if (easing === 'ease-in') easeFunction = BezierEasing(0, 0, 1, 0.5);
+    if (easing === 'ease-out') easeFunction = BezierEasing(0, 0, 1, 0.5);
     
     const animationTimer = setInterval(() => {
       // end animation?
-      if (timeLeft < 0) clearInterval(animationTimer);
+      if (animationTime > 1) clearInterval(animationTimer);
 
       // check if easing function is set
       if (!easeFunction) return;
 
       // calculate speed
-      const calculatedSpeed = easeFunction(timeLeft-1)*endZoomSpeed;
+      const calculatedSpeed = easeFunction(animationTime)*endZoomSpeed;
       this.setZoomSpeed(calculatedSpeed);
       console.log(calculatedSpeed);
       
-      timeLeft = timeLeft-0.05;
+      animationTime = animationTime+0.01;
     }, 20);
   }
 
