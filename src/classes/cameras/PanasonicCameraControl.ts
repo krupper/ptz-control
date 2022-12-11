@@ -77,10 +77,10 @@ export default class PanasonicCameraControl extends IPtzCameras {
   toggleAutoZoom(speed: number) {
 
     // set new zoom speed or stop zoom
-    if (this.currentZoomSpeed === 0) {
-      this.fadeToZoom(speed);
-    } else {
+    if (this.currentZoomSpeed > 2 && this.currentZoomSpeed < -2) {
       this.fadeToZoom(0);
+    } else {
+      this.fadeToZoom(speed);
     }
 
     // return this.setZoomSpeed(newZoomSpeed);
