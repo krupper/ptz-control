@@ -82,7 +82,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
     const zoomSpeedThreshold = 1;
 
     // set new zoom speed or stop zoom
-    if (this.currentZoomSpeed < zoomSpeedThreshold && this.currentZoomSpeed > zoomSpeedThreshold*-1) {
+    if (this.currentZoomSpeed < zoomSpeedThreshold && this.currentZoomSpeed > zoomSpeedThreshold * -1) {
       this.setZoomSpeed(speed);
     } else {
       this.setZoomSpeed(0);
@@ -255,6 +255,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
   }
 
   playbackPreset(presetNumber: number) {
+    presetNumber = presetNumber + 1;
     if (presetNumber < 0 || presetNumber > 99) {
       console.log(
         'Preset Number is out of range (0 to 99). Value: ' + presetNumber
