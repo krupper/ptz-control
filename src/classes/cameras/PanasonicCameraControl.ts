@@ -255,7 +255,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
   }
 
   playbackPreset(presetNumber: number) {
-    presetNumber = presetNumber + 1;
+    presetNumber = presetNumber - 1;
     if (presetNumber < 0 || presetNumber > 99) {
       console.log(
         'Preset Number is out of range (0 to 99). Value: ' + presetNumber
