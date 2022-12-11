@@ -76,7 +76,8 @@ export default class PanasonicCameraControl extends IPtzCameras {
     // check if value present
     if (!this.currentZoomSpeed) {
       console.log('Could not read current zoom state.');
-      return;
+      console.log('Set current zoom state to 0');
+      this.currentZoomSpeed = 0;
     }
 
     const thresholdForZoomSpeedInterpretedAsOff = 5;
