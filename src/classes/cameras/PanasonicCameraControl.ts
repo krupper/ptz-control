@@ -91,7 +91,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
     const startZoomSpeed = this.currentZoomSpeed;
     const zoomDifference = Math.abs(endZoomSpeed - startZoomSpeed);
     const zoomToggleValue = endZoomSpeed - startZoomSpeed >= 0 ? 0 : 1;
-    const zoomDirection = endZoomSpeed - startZoomSpeed > 0 ? 1 : -1;
+    const zoomDirection = endZoomSpeed > 0 ? 1 : -1;
 
     // clear ongoing auto-zoom-animations
     if (this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
