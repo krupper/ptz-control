@@ -109,17 +109,23 @@ export default class PanasonicCameraControl extends IPtzCameras {
       // end animation?
       if (animationTime > 1 && this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
 
-      const calculatedSpeed = easeFunction(animationTime) * zoomSpan;
+      const speedChange = easeFunction(animationTime) * zoomSpan;
 
+      let calculatedSpeed;
       if (direction) {
-        this.setZoomSpeed(startZoomSpeed + calculatedSpeed)
-        console.log(startZoomSpeed + calculatedSpeed);
-
+        calculatedSpeed = startZoomSpeed + speedChange;
       } else {
-        this.setZoomSpeed(startZoomSpeed - calculatedSpeed)
-        console.log(startZoomSpeed - calculatedSpeed);
-
+        calculatedSpeed = startZoomSpeed - speedChange;
       }
+
+      console.log({
+        animationTime,
+        'easeFunction(animationTime)': easeFunction(animationTime),
+        speedChange,
+        calculatedSpeed
+      });
+
+      this.setZoomSpeed(calculatedSpeed);
 
       animationTime = animationTime + 0.05;
     }, 20);
