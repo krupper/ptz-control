@@ -80,84 +80,13 @@ export default class PanasonicCameraControl extends IPtzCameras {
     });
 
     // set new zoom speed or stop zoom
-    if (this.currentZoomSpeed > 2 && this.currentZoomSpeed < -2) {
-      this.fadeToZoom(0);
+    if (this.currentZoomSpeed > 1 && this.currentZoomSpeed < -1) {
+      this.setZoomSpeed(0);
     } else {
-      this.fadeToZoom(speed);
+      this.setZoomSpeed(speed);
     }
 
     // return this.setZoomSpeed(newZoomSpeed);
-  }
-
-  fadeToZoom(endZoomSpeed: number) {
-    let startZoomSpeed = this.currentZoomSpeed
-    let direction = 0;
-
-    if (startZoomSpeed < endZoomSpeed) {
-      direction = 1;
-    } else {
-      direction = -1;
-    }
-
-    const zoomSpan = Math.abs(endZoomSpeed - startZoomSpeed);
-
-    // clear ongoing auto-zoom-animations
-    if (this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
-
-    let animationTime = 0;
-    const easeFunction = BezierEasing(0, 0, 1, 1);
-
-    // animation runner
-    this.autoZoomAnimationTimer = setInterval(() => {
-      // end animation?
-      if (animationTime > 1 && this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
-
-      const speedChange = easeFunction(animationTime) * zoomSpan;
-
-      let calculatedSpeed;
-      if (direction) {
-        calculatedSpeed = startZoomSpeed + speedChange;
-      } else {
-        calculatedSpeed = startZoomSpeed - speedChange;
-      }
-
-      console.log({
-        animationTime,
-        'easeFunction(animationTime)': easeFunction(animationTime),
-        speedChange,
-        calculatedSpeed
-      });
-
-      this.setZoomSpeed(calculatedSpeed);
-
-      animationTime = animationTime + 0.05;
-    }, 20);
-  }
-
-  fadeToZoomOrig(endZoomSpeed: number) {
-    const startZoomSpeed = this.currentZoomSpeed;
-    const zoomDifference = Math.abs(endZoomSpeed - startZoomSpeed);
-    const animationDirection = endZoomSpeed - startZoomSpeed >= 0 ? 0 : 1;
-    const zoomDirection = endZoomSpeed > 0 ? 1 : -1;
-
-    // clear ongoing auto-zoom-animations
-    if (this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
-
-    let animationTime = 0;
-    const easeFunction = BezierEasing(0, 0, 1, 1);
-
-    // animation runner
-    this.autoZoomAnimationTimer = setInterval(() => {
-      // end animation?
-      if (animationTime > 1 && this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
-
-      // calculate speed
-      const calculatedSpeed = easeFunction(Math.abs(animationDirection - animationTime)) * zoomDifference;
-      this.setZoomSpeed(calculatedSpeed * zoomDirection);
-      console.log(calculatedSpeed);
-
-      animationTime = animationTime + 0.05;
-    }, 20);
   }
 
   setAutoFocus(status: boolean) {
