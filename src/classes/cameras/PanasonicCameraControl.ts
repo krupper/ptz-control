@@ -1,6 +1,6 @@
 import IPtzCameras from './PtzCameras';
 import axios, { AxiosError } from 'axios';
-import anime, { EasingOptions } from 'animejs';
+import BezierEasing from 'bezier-easing';
 
 // build according to
 // https://eww.pass.panasonic.co.jp/pro-av/support/content/guide/DEF/HE50_120_IP/HDIntegratedCamera_InterfaceSpecifications-E.pdf
@@ -85,29 +85,34 @@ export default class PanasonicCameraControl extends IPtzCameras {
     // set new zoom speed or stop zoom
     if (this.currentZoomSpeed < thresholdForZoomSpeedInterpretedAsOff
       && this.currentZoomSpeed > thresholdForZoomSpeedInterpretedAsOff * -1) {
-      this.fadeToZoom(speed, 'easeInSine');
+      this.fadeToZoom(speed, 'ease-in');
     } else {
-      this.fadeToZoom(0, 'easeOutSine');
+      this.fadeToZoom(0, 'ease-out');
     }
 
     // return this.setZoomSpeed(newZoomSpeed);
   }
 
-  fadeToZoom(speed: number, easing: EasingOptions) {
-    let speedObject = {
-      newSpeed: speed
-    };
+  fadeToZoom(endZoomSpeed: number, easing: 'ease-in' | 'ease-out') {
+    const startZoomSpeed = this.currentZoomSpeed;
+    let timeLeft = 1;
+    let easeFunction: undefined | BezierEasing.EasingFunction = undefined;
+    
+    if (easing === 'ease-in') easeFunction = BezierEasing(0.46, 0, 1, 1);
+    if (easing === 'ease-out') easeFunction = BezierEasing(0.46, 0, 1, 1);
+    
+    const animationTimer = setInterval(() => {
+      // end animation?
+      if (timeLeft < 0) clearInterval(animationTimer);
 
-    anime({
-      targets: speedObject,
-      newSpeed: speed,
-      round: 1,
-      duration: 1000,
-      easing: easing,
-      update: () => {
-        this.setZoomSpeed(speedObject.newSpeed);
-      }
-    });
+      // check if easing function is set
+      if (!easeFunction) return;
+
+      // calculate speed
+      const calculatedSpeed = easeFunction(timeLeft)*endZoomSpeed;
+      this.setZoomSpeed(calculatedSpeed);
+      timeLeft = timeLeft-0.05;
+    }, 20);
   }
 
   setAutoFocus(status: boolean) {
