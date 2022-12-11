@@ -96,7 +96,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
     if (this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
 
     let animationTime = 0;
-    const easeFunction = BezierEasing(0, 0, 1, 0.5);
+    const easeFunction = BezierEasing(0, 0, 1, 1);
 
     // animation runner
     this.autoZoomAnimationTimer = setInterval(() => {
