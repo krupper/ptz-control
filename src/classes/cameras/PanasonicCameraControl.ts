@@ -74,11 +74,9 @@ export default class PanasonicCameraControl extends IPtzCameras {
   }
 
   toggleAutoZoom(speed: number) {
-    const thresholdForZoomSpeedInterpretedAsOff = 2;
 
     // set new zoom speed or stop zoom
-    if (this.currentZoomSpeed < thresholdForZoomSpeedInterpretedAsOff
-      && this.currentZoomSpeed > thresholdForZoomSpeedInterpretedAsOff * -1) {
+    if (this.currentZoomSpeed === 0) {
       this.fadeToZoom(speed);
     } else {
       this.fadeToZoom(0);
@@ -88,9 +86,43 @@ export default class PanasonicCameraControl extends IPtzCameras {
   }
 
   fadeToZoom(endZoomSpeed: number) {
+    let direction = 0;
+
+    if (this.currentZoomSpeed < endZoomSpeed) {
+      direction = 1;
+    } else {
+      direction = -1;
+    }
+
+    const zoomSpan = Math.abs(this.currentZoomSpeed - endZoomSpeed);
+
+    // clear ongoing auto-zoom-animations
+    if (this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
+
+    let animationTime = 0;
+    const easeFunction = BezierEasing(0, 0, 1, 1);
+
+    // animation runner
+    this.autoZoomAnimationTimer = setInterval(() => {
+      // end animation?
+      if (animationTime > 1 && this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
+
+      const calculatedSpeed = easeFunction(animationTime) * zoomSpan;
+
+      if (direction) {
+        this.setZoomSpeed(this.currentZoomSpeed + calculatedSpeed)
+      } else {
+        this.setZoomSpeed(this.currentZoomSpeed - calculatedSpeed)
+      }
+
+      animationTime = animationTime + 0.05;
+    }, 20);
+  }
+
+  fadeToZoomOrig(endZoomSpeed: number) {
     const startZoomSpeed = this.currentZoomSpeed;
     const zoomDifference = Math.abs(endZoomSpeed - startZoomSpeed);
-    const zoomToggleValue = endZoomSpeed - startZoomSpeed >= 0 ? 0 : 1;
+    const animationDirection = endZoomSpeed - startZoomSpeed >= 0 ? 0 : 1;
     const zoomDirection = endZoomSpeed > 0 ? 1 : -1;
 
     // clear ongoing auto-zoom-animations
@@ -105,8 +137,8 @@ export default class PanasonicCameraControl extends IPtzCameras {
       if (animationTime > 1 && this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
 
       // calculate speed
-      const calculatedSpeed = easeFunction(Math.abs(zoomToggleValue - animationTime)) * zoomDifference;
-      this.setZoomSpeed(calculatedSpeed*zoomDirection);
+      const calculatedSpeed = easeFunction(Math.abs(animationDirection - animationTime)) * zoomDifference;
+      this.setZoomSpeed(calculatedSpeed * zoomDirection);
       console.log(calculatedSpeed);
 
       animationTime = animationTime + 0.05;
