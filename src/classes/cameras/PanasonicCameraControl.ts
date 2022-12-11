@@ -79,11 +79,13 @@ export default class PanasonicCameraControl extends IPtzCameras {
       'this.currentZoomSpeed': this.currentZoomSpeed
     });
 
+    const zoomSpeedThreshold = 1;
+
     // set new zoom speed or stop zoom
-    if (this.currentZoomSpeed > 1 && this.currentZoomSpeed < -1) {
-      this.setZoomSpeed(0);
-    } else {
+    if (this.currentZoomSpeed < zoomSpeedThreshold && this.currentZoomSpeed > zoomSpeedThreshold*-1) {
       this.setZoomSpeed(speed);
+    } else {
+      this.setZoomSpeed(0);
     }
 
     // return this.setZoomSpeed(newZoomSpeed);
