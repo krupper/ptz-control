@@ -128,14 +128,14 @@ class AppService {
     currentCameraNumber: number,
     appService: AppService
   ) {
-    appService.cameras[currentCameraNumber]?.toggleAutoZoom(-10);
+    appService.cameras[currentCameraNumber]?.toggleAutoZoom(-5);
   }
   private mapRightShoulderButton(
     button: ButtonType,
     currentCameraNumber: number,
     appService: AppService
     ) {
-    appService.cameras[currentCameraNumber]?.toggleAutoZoom(10);
+    appService.cameras[currentCameraNumber]?.toggleAutoZoom(5);
   }
   private mapLeftTriggerMotion(
     value: number,

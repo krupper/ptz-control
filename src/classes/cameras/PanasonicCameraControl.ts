@@ -27,10 +27,11 @@ export default class PanasonicCameraControl extends IPtzCameras {
   private lastPanTiltSpeed: string | undefined;
   private lastZoomSpeed: string | undefined;
   private lastFocusSpeed: string | undefined;
-  private currentZoomSpeed: number | undefined;
+  private currentZoomSpeed: number = 0;
   private importantEventsQueue: string[] = [];
   private fluctualEventQueueRoundRobin = 0;
   private fluctualEventQueueRoundRobinParticipants = 3; // pan-tilt speed, zoom speed, focus speed
+  private autoZoomAnimationTimer: NodeJS.Timeout | undefined = undefined;
 
   setPanTiltSpeed(pan: number, tilt: number) {
     if (pan < -100 || pan > 100) {
@@ -73,14 +74,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
   }
 
   toggleAutoZoom(speed: number) {
-    // check if value present
-    if (!this.currentZoomSpeed) {
-      console.log('Could not read current zoom state.');
-      console.log('Set current zoom state to 0');
-      this.currentZoomSpeed = 0;
-    }
-
-    const thresholdForZoomSpeedInterpretedAsOff = 5;
+    const thresholdForZoomSpeedInterpretedAsOff = 2;
 
     // set new zoom speed or stop zoom
     if (this.currentZoomSpeed < thresholdForZoomSpeedInterpretedAsOff
@@ -93,23 +87,24 @@ export default class PanasonicCameraControl extends IPtzCameras {
     // return this.setZoomSpeed(newZoomSpeed);
   }
 
-  fadeToZoom(endZoomSpeed: number, easing: 'ease-in' | 'ease-out') {
+  fadeToZoom(endZoomSpeed: number) {
     const startZoomSpeed = this.currentZoomSpeed;
-    let animationTime = 0;
-    let easeFunction: undefined | BezierEasing.EasingFunction = undefined;
-    
-    if (easing === 'ease-in') easeFunction = BezierEasing(0, 0, 1, 0.5);
-    if (easing === 'ease-out') easeFunction = BezierEasing(0, 0, 1, 0.5);
-    
-    const animationTimer = setInterval(() => {
-      // end animation?
-      if (animationTime > 1) clearInterval(animationTimer);
+    const zoomDifference = Math.abs(endZoomSpeed-startZoomSpeed);
+    const zoomDirection = endZoomSpeed-startZoomSpeed >= 0 ? 0 : 1;
 
-      // check if easing function is set
-      if (!easeFunction) return;
+    // clear ongoing auto-zoom-animations
+    if (this.autoZoomAnimationTimer) clearInterval(this.autoZoomAnimationTimer);
+
+    let animationTime = 0;
+    const easeFunction = BezierEasing(0, 0, 1, 0.5);
+
+    // animation runner
+    this.autoZoomAnimationTimer = setInterval((camera) => {
+      // end animation?
+      if (animationTime > 1) clearInterval(camera);
 
       // calculate speed
-      const calculatedSpeed = easeFunction(animationTime)*endZoomSpeed;
+      const calculatedSpeed = easeFunction(Math.abs(zoomDirection-animationTime))*zoomDifference;
       this.setZoomSpeed(calculatedSpeed);
       console.log(calculatedSpeed);
       
