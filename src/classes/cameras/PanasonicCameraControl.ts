@@ -1,5 +1,6 @@
 import IPtzCameras from './PtzCameras';
-import axios, {AxiosError} from 'axios';
+import axios, { AxiosError } from 'axios';
+import BezierEasing from 'bezier-easing';
 
 // build according to
 // https://eww.pass.panasonic.co.jp/pro-av/support/content/guide/DEF/HE50_120_IP/HDIntegratedCamera_InterfaceSpecifications-E.pdf
@@ -26,9 +27,11 @@ export default class PanasonicCameraControl extends IPtzCameras {
   private lastPanTiltSpeed: string | undefined;
   private lastZoomSpeed: string | undefined;
   private lastFocusSpeed: string | undefined;
+  private currentZoomSpeed: number = 0;
   private importantEventsQueue: string[] = [];
   private fluctualEventQueueRoundRobin = 0;
   private fluctualEventQueueRoundRobinParticipants = 3; // pan-tilt speed, zoom speed, focus speed
+  private autoZoomAnimationTimer: NodeJS.Timeout | undefined = undefined;
 
   setPanTiltSpeed(pan: number, tilt: number) {
     if (pan < -100 || pan > 100) {
@@ -55,7 +58,11 @@ export default class PanasonicCameraControl extends IPtzCameras {
   setZoomSpeed(speed: number) {
     if (speed < -100 || speed > 100) {
       console.log('Zoom speed is out of range (-100 to 100). Value: ' + speed);
+      return;
     }
+
+    // set current zoom speed (zoom speed can not be queried from the camera so we have to save it)
+    this.currentZoomSpeed = speed;
 
     // conversion to panasonic scale 01-99
     const panasonic_zoom = (0.49 * speed + 50)
@@ -65,6 +72,23 @@ export default class PanasonicCameraControl extends IPtzCameras {
     const command = 'Z' + panasonic_zoom;
 
     return this.sendCommandToPTZ('zoomSpeed', command, false);
+  }
+
+  toggleAutoZoom(speed: number) {
+    console.log({
+      'this.currentZoomSpeed': this.currentZoomSpeed
+    });
+
+    const zoomSpeedThreshold = 1;
+
+    // set new zoom speed or stop zoom
+    if (this.currentZoomSpeed < zoomSpeedThreshold && this.currentZoomSpeed > zoomSpeedThreshold * -1) {
+      this.setZoomSpeed(speed);
+    } else {
+      this.setZoomSpeed(0);
+    }
+
+    // return this.setZoomSpeed(newZoomSpeed);
   }
 
   setAutoFocus(status: boolean) {
@@ -231,6 +255,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
   }
 
   playbackPreset(presetNumber: number) {
+    presetNumber = presetNumber - 1;
     if (presetNumber < 0 || presetNumber > 99) {
       console.log(
         'Preset Number is out of range (0 to 99). Value: ' + presetNumber
@@ -271,7 +296,7 @@ export default class PanasonicCameraControl extends IPtzCameras {
       'http://' + this.ip + '/cgi-bin/aw_ptz?cmd=%23' + command + '&res=1';
     console.log(url);
     try {
-      const data = await axios.get(url, {timeout: 500});
+      const data = await axios.get(url, { timeout: 500 });
       return data.data;
     } catch (err) {
       const error = err as Error | AxiosError;

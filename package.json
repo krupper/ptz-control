@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/krupper/ptz-control#readme",
   "devDependencies": {
+    "@types/animejs": "^3.1.6",
     "@types/node": "^14.18.12",
     "gts": "^3.1.0",
     "typescript": "^4.0.3"
