@@ -6,7 +6,7 @@ export default {
       cameraIdentifier: 'Camera 1', // choose a unique name
       vendor: 'Panasonic',
       model: 'AW-HE130',
-      ip: '192.168.1.100',
+      ip: '10.1.3.41',
     },
   ],
 };
