@@ -134,7 +134,7 @@ class AppService {
     button: ButtonType,
     currentCameraNumber: number,
     appService: AppService
-    ) {
+  ) {
     appService.cameras[currentCameraNumber]?.toggleAutoZoom(5);
   }
   private mapLeftTriggerMotion(
@@ -161,7 +161,7 @@ class AppService {
 
       // add new controller
       Gamepad.on('controller-device-added', data => {
-        console.log('Yeaha! Found an', data.name, ' Vendor ID: ',data.vendor_id, ' Product ID: ', data.product_id);
+        console.log('Yeaha! Found an', data.name, ' Vendor ID: ', data.vendor_id, ' Product ID: ', data.product_id);
 
         if (!data.player) {
           console.log('No Player ID for controller found');
@@ -172,9 +172,10 @@ class AppService {
 
         // if controller is: Xbox Series X Controller
         if (
-          data.vendor_id === 1118 &&
+          (data.vendor_id === 1118 || data.vendor_id === 1118) &&
           (data.product_id === 2835 ||
             data.product_id === 2834 ||
+            data.product_id === 746 ||
             data.product_id === 736)
         ) {
           newController = new XboxController(
