@@ -161,7 +161,7 @@ class AppService {
 
       // add new controller
       Gamepad.on('controller-device-added', data => {
-        console.log('Yeaha! Found an', data.name);
+        console.log('Yeaha! Found an', data.name, ' Vendor ID: ',data.vendor_id, ' Product ID: ', data.product_id);
 
         if (!data.player) {
           console.log('No Player ID for controller found');
