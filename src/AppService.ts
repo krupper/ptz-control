@@ -1,7 +1,7 @@
 import config from 'config';
-import Gamepad, {ButtonType} from 'sdl2-gamecontroller';
+import Gamepad, { ButtonType } from 'sdl2-gamecontroller';
 import Controller from './classes/controller/Controller';
-import {IConfigCamera} from './interfaces/IConfig.js';
+import { IConfigCamera } from './interfaces/IConfig.js';
 import PtzCameras from './classes/cameras/PtzCameras';
 import PanasonicCameraControl from './classes/cameras/PanasonicCameraControl';
 import XboxController from './classes/controller/XBoxController';
@@ -74,16 +74,16 @@ class AppService {
     ) {
       console.log(
         'Controller ' +
-          controller.controllerId +
-          ' selected camera: ' +
-          appService.cameras[controller.currentCameraNumber].cameraIdentifier +
-          ' on ip: ' +
-          appService.cameras[controller.currentCameraNumber].ip +
-          ' (' +
-          appService.cameras[controller.currentCameraNumber].vendor +
-          ' ' +
-          appService.cameras[controller.currentCameraNumber].model +
-          ')'
+        controller.controllerId +
+        ' selected camera: ' +
+        appService.cameras[controller.currentCameraNumber].cameraIdentifier +
+        ' on ip: ' +
+        appService.cameras[controller.currentCameraNumber].ip +
+        ' (' +
+        appService.cameras[controller.currentCameraNumber].vendor +
+        ' ' +
+        appService.cameras[controller.currentCameraNumber].model +
+        ')'
       );
     }
     if (button === 'dpdown') {
@@ -115,27 +115,27 @@ class AppService {
       appService.cameras[currentCameraNumber]?.stepFocus('far', 15);
     }
     if (button === 'y')
-      appService.cameras[controller.currentCameraNumber].playbackPreset(1);
+      appService.cameras[controller.currentCameraNumber].playbackPreset(6);
     if (button === 'x')
-      appService.cameras[controller.currentCameraNumber].playbackPreset(2);
+      appService.cameras[currentCameraNumber]?.stepIris('down', 100);
     if (button === 'b')
-      appService.cameras[controller.currentCameraNumber].playbackPreset(3);
+      appService.cameras[currentCameraNumber]?.stepIris('up', 100);
     if (button === 'a')
-      appService.cameras[controller.currentCameraNumber].playbackPreset(4);
+      appService.cameras[controller.currentCameraNumber].playbackPreset(1);
   }
   private mapLeftShoulderButton(
     button: ButtonType,
     currentCameraNumber: number,
     appService: AppService
   ) {
-    appService.cameras[currentCameraNumber]?.stepIris('down', 100);
+    appService.cameras[currentCameraNumber]?.toggleAutoZoom(-5);
   }
   private mapRightShoulderButton(
     button: ButtonType,
     currentCameraNumber: number,
     appService: AppService
   ) {
-    appService.cameras[currentCameraNumber]?.stepIris('up', 100);
+    appService.cameras[currentCameraNumber]?.toggleAutoZoom(5);
   }
   private mapLeftTriggerMotion(
     value: number,
@@ -161,7 +161,7 @@ class AppService {
 
       // add new controller
       Gamepad.on('controller-device-added', data => {
-        console.log('Yeaha! Found an', data.name);
+        console.log('Yeaha! Found an', data.name, ' Vendor ID: ', data.vendor_id, ' Product ID: ', data.product_id);
 
         if (!data.player) {
           console.log('No Player ID for controller found');
@@ -172,9 +172,10 @@ class AppService {
 
         // if controller is: Xbox Series X Controller
         if (
-          data.vendor_id === 1118 &&
+          (data.vendor_id === 1118 || data.vendor_id === 1118) &&
           (data.product_id === 2835 ||
             data.product_id === 2834 ||
+            data.product_id === 746 ||
             data.product_id === 736)
         ) {
           newController = new XboxController(
@@ -191,9 +192,9 @@ class AppService {
         if (newController) {
           console.log(
             'Created new controller object with player id: ' +
-              data.player +
-              ' and joystickDeviceIndex: ' +
-              data.which
+            data.player +
+            ' and joystickDeviceIndex: ' +
+            data.which
           );
 
           // add controller mapping
