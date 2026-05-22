@@ -11,6 +11,7 @@ abstract class Controller {
   joystickDeviceIndex: number;
   currentCameraNumber: number;
   currentCameraObject: PtzCameras | undefined;
+  isConnected: boolean;
 
   constructor(
     appService: AppService,
@@ -25,6 +26,7 @@ abstract class Controller {
     this.controllerId = controllerId;
     this.joystickDeviceIndex = joystickDeviceIndex;
     this.currentCameraNumber = 0;
+    this.isConnected = true;
 
     // select first camera if no camera is selected
     if (this.appService.cameras[this.currentCameraNumber]) {

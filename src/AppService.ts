@@ -163,11 +163,29 @@ class AppService {
       Gamepad.on('controller-device-added', data => {
         console.log('Yeaha! Found an', data.name, ' Vendor ID: ', data.vendor_id, ' Product ID: ', data.product_id);
 
-        if (!data.player) {
+        if (data.player === undefined) {
           console.log('No Player ID for controller found');
           return;
         }
 
+        // Check if this controller slot already exists (reconnect)
+        const existingController = this.controllers[data.player];
+        
+        if (existingController && !existingController.isConnected) {
+          // Reconnect: Reactivate existing controller
+          console.log(
+            'Controller reconnected at player slot:', data.player,
+            '- Restoring camera:', existingController.currentCameraNumber
+          );
+          existingController.isConnected = true;
+          existingController.joystickDeviceIndex = data.which; // Update device index (may change)
+          
+          // rumble to signal reconnection and camera number
+          this.sendControllerCameraNumberRumbleFeedback(existingController);
+          return;
+        }
+
+        // New controller connection
         let newController: Controller | undefined = undefined;
 
         // if controller is: Xbox Series X Controller
@@ -216,101 +234,102 @@ class AppService {
 
       // removed controller
       Gamepad.on('controller-device-removed', data => {
-        console.log('Controller removed - Joystick Index:', data.which);
+        console.log('Controller disconnected - Joystick Index:', data.which);
         
-        // find and remove controller by joystickDeviceIndex
-        const controllerToRemove = this.controllers.find(
+        // find controller by joystickDeviceIndex and mark as disconnected
+        const controllerToDisconnect = this.controllers.find(
           controller => controller && controller.joystickDeviceIndex === data.which
         );
         
-        if (controllerToRemove) {
+        if (controllerToDisconnect) {
           console.log(
-            'Removing controller with Player ID:', controllerToRemove.controllerId,
-            'was controlling camera:', controllerToRemove.currentCameraNumber
+            'Marking controller as disconnected - Player ID:', controllerToDisconnect.controllerId,
+            '- Current camera:', controllerToDisconnect.currentCameraNumber,
+            '(will be restored on reconnect)'
           );
-          delete this.controllers[controllerToRemove.controllerId];
+          controllerToDisconnect.isConnected = false;
         }
       });
 
       // leftstick methods
       Gamepad.on('leftx', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyLeftStickMotion(data);
       });
       Gamepad.on('lefty', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyLeftStickMotion(data);
       });
 
       // rightstick methods
       Gamepad.on('rightx', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyRightStickMotion(data);
       });
       Gamepad.on('righty', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyRightStickMotion(data);
       });
 
       // button down methods
       Gamepad.on('back:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('guide:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('start:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('a:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('b:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('x:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('y:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('dpup:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('dpdown:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('dpleft:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('dpright:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyButtonDown(data);
       });
       Gamepad.on('leftshoulder:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyLeftShoulderButton(data);
       });
       Gamepad.on('rightshoulder:down', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyRightShoulderButton(data);
       });
       Gamepad.on('lefttrigger', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyLeftTriggerMotion(data);
       });
       Gamepad.on('righttrigger', data => {
-        if (data.player && this.controllers[data.player])
+        if (data.player !== undefined && this.controllers[data.player]?.isConnected)
           this.controllers[data.player].proxyRightTriggerMotion(data);
       });
       Gamepad.on('error', data => {
