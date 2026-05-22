@@ -182,7 +182,8 @@ class AppService {
             this,
             'XBox Controller',
             'Microsoft',
-            data.player
+            data.player,
+            data.which
           );
         } else {
           console.log('Controller not supported');
@@ -215,10 +216,20 @@ class AppService {
 
       // removed controller
       Gamepad.on('controller-device-removed', data => {
-        // remove controller from array
-        this.controllers = this.controllers.filter(controller => {
-          return controller.controllerId !== data.which;
-        });
+        console.log('Controller removed - Joystick Index:', data.which);
+        
+        // find and remove controller by joystickDeviceIndex
+        const controllerToRemove = this.controllers.find(
+          controller => controller && controller.joystickDeviceIndex === data.which
+        );
+        
+        if (controllerToRemove) {
+          console.log(
+            'Removing controller with Player ID:', controllerToRemove.controllerId,
+            'was controlling camera:', controllerToRemove.currentCameraNumber
+          );
+          delete this.controllers[controllerToRemove.controllerId];
+        }
       });
 
       // leftstick methods

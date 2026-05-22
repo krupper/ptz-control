@@ -30,9 +30,10 @@ class XboxController extends Controller {
     appService: AppService,
     product: string,
     manufacturer: string,
-    controllerId: number
+    controllerId: number,
+    joystickDeviceIndex: number
   ) {
-    super(appService, product, manufacturer, controllerId);
+    super(appService, product, manufacturer, controllerId, joystickDeviceIndex);
   }
 
   proxyButtonDown(data: ButtonPress): void {

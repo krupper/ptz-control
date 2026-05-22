@@ -8,6 +8,7 @@ abstract class Controller {
   product: string;
   manufacturer: string;
   controllerId: number;
+  joystickDeviceIndex: number;
   currentCameraNumber: number;
   currentCameraObject: PtzCameras | undefined;
 
@@ -15,12 +16,14 @@ abstract class Controller {
     appService: AppService,
     product: string,
     manufacturer: string,
-    controllerId: number
+    controllerId: number,
+    joystickDeviceIndex: number
   ) {
     this.appService = appService;
     this.product = product;
     this.manufacturer = manufacturer;
     this.controllerId = controllerId;
+    this.joystickDeviceIndex = joystickDeviceIndex;
     this.currentCameraNumber = 0;
 
     // select first camera if no camera is selected
